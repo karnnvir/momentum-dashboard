@@ -43,7 +43,7 @@ result = load_latest_run()
 
 st.title("Momentum Dashboard")
 st.caption(
-    "Nifty Next 50 + Nifty Midcap 150, scored weekly for price momentum and fundamental support. "
+    "Nifty 50 + Nifty Next 50 + Nifty Midcap 150, scored weekly for price momentum and fundamental support. "
     "**These scores are screening signals, not buy recommendations.** "
     "Every score is a calculated number from documented inputs — see the **Methodology** page "
     "(sidebar) for the exact formula behind each one."
@@ -110,9 +110,11 @@ for _, row in flagged.iterrows():
             f"### {row['group_label']}  —  {row['name']} ({row['ticker']})  "
             f"&nbsp; {row.get('risk_band_label', '')}"
         )
+        momentum_delta = row.get("momentum_score_delta")
+        support_delta = row.get("support_score_delta")
         c1, c2, c3, c4, c5 = st.columns(5)
-        c1.metric("Momentum", row.get("momentum_score"), row.get("momentum_score_delta"))
-        c2.metric("Support", row.get("support_score"), row.get("support_score_delta"))
+        c1.metric("Momentum", row.get("momentum_score"), momentum_delta if pd.notna(momentum_delta) else None)
+        c2.metric("Support", row.get("support_score"), support_delta if pd.notna(support_delta) else None)
         c3.metric("Catalyst", row.get("catalyst_score", 0))
         c4.metric("1M return", f"{row.get('ret_1m', 0) * 100:.1f}%" if pd.notna(row.get("ret_1m")) else "—")
         c5.metric("3M return", f"{row.get('ret_3m', 0) * 100:.1f}%" if pd.notna(row.get("ret_3m")) else "—")
