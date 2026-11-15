@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from momentum.scoring import GROUP_LABELS, EARLY_SIGNS, SUPPORTED_TREND, HYPE_RISK, NOT_MOVING_YET  # noqa: E402
+from momentum.universe import INDEX_DISPLAY_NAMES  # noqa: E402
 
 DATA_DIR = ROOT / "data"
 RUNS_DIR = DATA_DIR / "runs"
@@ -58,6 +59,12 @@ if result is None:
 run_date, df, catalyst_records = result
 st.caption(f"Last run: {run_date}")
 
+universe_options = ["All"] + [INDEX_DISPLAY_NAMES.get(i, i) for i in sorted(df["index"].dropna().unique())]
+selected_universe = st.selectbox("Universe", universe_options)
+if selected_universe != "All":
+    index_key = next(k for k, v in INDEX_DISPLAY_NAMES.items() if v == selected_universe)
+    df = df[df["index"] == index_key]
+
 catalysts_by_ticker: dict[str, list[dict]] = {}
 for rec in catalyst_records:
     catalysts_by_ticker.setdefault(rec["ticker"], []).append(rec)
@@ -80,6 +87,8 @@ table_cols = [
     "momentum_score_delta", "support_score_delta",
 ]
 display_df = df[[c for c in table_cols if c in df.columns]].copy()
+if "index" in display_df.columns:
+    display_df["index"] = display_df["index"].map(lambda i: INDEX_DISPLAY_NAMES.get(i, i))
 for pct_col in ("ret_1m", "ret_3m"):
     if pct_col in display_df.columns:
         display_df[pct_col] = (display_df[pct_col] * 100).round(1)

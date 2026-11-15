@@ -1,9 +1,13 @@
-"""Fetch the stock universe: Nifty Next 50 + Nifty Midcap 150 constituents.
+"""Fetch the stock universe: Nifty 50 + Nifty Next 50 + Nifty Midcap 150.
 
 Pulls live constituent CSVs from niftyindices.com so index rebalances are
 picked up automatically. Falls back to a bundled cached CSV (data/universe_cache/)
 if the site is unreachable or changes shape, so a weekly run never hard-fails
 on this step alone.
+
+The three tiers don't overlap by rank construction (1-50, 51-100, 101-250),
+so `index` is a single tag per stock, not a multi-membership flag - keeps
+the dashboard's universe dropdown a simple filter on one column.
 """
 
 from __future__ import annotations
@@ -14,6 +18,7 @@ from pathlib import Path
 import pandas as pd
 import requests
 
+NIFTY_50_URL = "https://niftyindices.com/IndexConstituent/ind_nifty50list.csv"
 NIFTY_NEXT50_URL = "https://niftyindices.com/IndexConstituent/ind_niftynext50list.csv"
 NIFTY_MIDCAP150_URL = "https://niftyindices.com/IndexConstituent/ind_niftymidcap150list.csv"
 
@@ -64,21 +69,29 @@ def _normalize(df: pd.DataFrame, index_name: str) -> pd.DataFrame:
     return out
 
 
+INDEX_DISPLAY_NAMES = {
+    "NIFTY_50": "Nifty 50",
+    "NIFTY_NEXT_50": "Nifty Next 50",
+    "NIFTY_MIDCAP_150": "Nifty Midcap 150",
+}
+
+
 def fetch_universe() -> pd.DataFrame:
     """Return a DataFrame with columns: symbol, name, index, ticker.
 
-    `index` is either "NIFTY_NEXT_50" or "NIFTY_MIDCAP_150". The two indices
-    don't overlap by construction (ranks 51-100 vs 101-250), so no de-dup is
-    needed, but duplicates are still dropped defensively in case a stock
-    migrated between them mid-cache.
+    `index` is one of "NIFTY_50", "NIFTY_NEXT_50", "NIFTY_MIDCAP_150". The
+    three tiers don't overlap by construction (ranks 1-50, 51-100, 101-250),
+    so no de-dup is needed, but duplicates are still dropped defensively in
+    case a stock migrated between tiers mid-cache.
     """
+    nifty50 = _normalize(_fetch_csv(NIFTY_50_URL, "nifty_50.csv"), "NIFTY_50")
     next50 = _normalize(
         _fetch_csv(NIFTY_NEXT50_URL, "nifty_next50.csv"), "NIFTY_NEXT_50"
     )
     midcap150 = _normalize(
         _fetch_csv(NIFTY_MIDCAP150_URL, "nifty_midcap150.csv"), "NIFTY_MIDCAP_150"
     )
-    universe = pd.concat([next50, midcap150], ignore_index=True)
+    universe = pd.concat([nifty50, next50, midcap150], ignore_index=True)
     universe = universe.drop_duplicates(subset="symbol", keep="first")
     return universe.reset_index(drop=True)
 
