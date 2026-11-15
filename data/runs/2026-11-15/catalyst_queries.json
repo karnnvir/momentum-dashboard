@@ -1,0 +1,891 @@
+{
+  "ADANIPORTS.NS": [
+    "Adani Ports and Special Economic Zone Ltd. ADANIPORTS news",
+    "Adani Ports and Special Economic Zone Ltd. order win OR partnership OR contract",
+    "Adani Ports and Special Economic Zone Ltd. brokerage upgrade OR price target",
+    "Adani Ports and Special Economic Zone Ltd. results OR turnaround OR margin",
+    "Adani Ports and Special Economic Zone Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "APOLLOHOSP.NS": [
+    "Apollo Hospitals Enterprise Ltd. APOLLOHOSP news",
+    "Apollo Hospitals Enterprise Ltd. order win OR partnership OR contract",
+    "Apollo Hospitals Enterprise Ltd. brokerage upgrade OR price target",
+    "Apollo Hospitals Enterprise Ltd. results OR turnaround OR margin",
+    "Apollo Hospitals Enterprise Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "AXISBANK.NS": [
+    "Axis Bank Ltd. AXISBANK news",
+    "Axis Bank Ltd. order win OR partnership OR contract",
+    "Axis Bank Ltd. brokerage upgrade OR price target",
+    "Axis Bank Ltd. results OR turnaround OR margin",
+    "Axis Bank Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "BSE.NS": [
+    "BSE Ltd. BSE news",
+    "BSE Ltd. order win OR partnership OR contract",
+    "BSE Ltd. brokerage upgrade OR price target",
+    "BSE Ltd. results OR turnaround OR margin",
+    "BSE Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "BAJFINANCE.NS": [
+    "Bajaj Finance Ltd. BAJFINANCE news",
+    "Bajaj Finance Ltd. order win OR partnership OR contract",
+    "Bajaj Finance Ltd. brokerage upgrade OR price target",
+    "Bajaj Finance Ltd. results OR turnaround OR margin",
+    "Bajaj Finance Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "BHARTIARTL.NS": [
+    "Bharti Airtel Ltd. BHARTIARTL news",
+    "Bharti Airtel Ltd. order win OR partnership OR contract",
+    "Bharti Airtel Ltd. brokerage upgrade OR price target",
+    "Bharti Airtel Ltd. results OR turnaround OR margin",
+    "Bharti Airtel Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "DRREDDY.NS": [
+    "Dr. Reddy's Laboratories Ltd. DRREDDY news",
+    "Dr. Reddy's Laboratories Ltd. order win OR partnership OR contract",
+    "Dr. Reddy's Laboratories Ltd. brokerage upgrade OR price target",
+    "Dr. Reddy's Laboratories Ltd. results OR turnaround OR margin",
+    "Dr. Reddy's Laboratories Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "ETERNAL.NS": [
+    "Eternal Ltd. ETERNAL news",
+    "Eternal Ltd. order win OR partnership OR contract",
+    "Eternal Ltd. brokerage upgrade OR price target",
+    "Eternal Ltd. results OR turnaround OR margin",
+    "Eternal Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "HCLTECH.NS": [
+    "HCL Technologies Ltd. HCLTECH news",
+    "HCL Technologies Ltd. order win OR partnership OR contract",
+    "HCL Technologies Ltd. brokerage upgrade OR price target",
+    "HCL Technologies Ltd. results OR turnaround OR margin",
+    "HCL Technologies Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "HDFCBANK.NS": [
+    "HDFC Bank Ltd. HDFCBANK news",
+    "HDFC Bank Ltd. order win OR partnership OR contract",
+    "HDFC Bank Ltd. brokerage upgrade OR price target",
+    "HDFC Bank Ltd. results OR turnaround OR margin",
+    "HDFC Bank Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "HINDALCO.NS": [
+    "Hindalco Industries Ltd. HINDALCO news",
+    "Hindalco Industries Ltd. order win OR partnership OR contract",
+    "Hindalco Industries Ltd. brokerage upgrade OR price target",
+    "Hindalco Industries Ltd. results OR turnaround OR margin",
+    "Hindalco Industries Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "ICICIBANK.NS": [
+    "ICICI Bank Ltd. ICICIBANK news",
+    "ICICI Bank Ltd. order win OR partnership OR contract",
+    "ICICI Bank Ltd. brokerage upgrade OR price target",
+    "ICICI Bank Ltd. results OR turnaround OR margin",
+    "ICICI Bank Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "INDIGO.NS": [
+    "InterGlobe Aviation Ltd. INDIGO news",
+    "InterGlobe Aviation Ltd. order win OR partnership OR contract",
+    "InterGlobe Aviation Ltd. brokerage upgrade OR price target",
+    "InterGlobe Aviation Ltd. results OR turnaround OR margin",
+    "InterGlobe Aviation Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "JSWSTEEL.NS": [
+    "JSW Steel Ltd. JSWSTEEL news",
+    "JSW Steel Ltd. order win OR partnership OR contract",
+    "JSW Steel Ltd. brokerage upgrade OR price target",
+    "JSW Steel Ltd. results OR turnaround OR margin",
+    "JSW Steel Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "KOTAKBANK.NS": [
+    "Kotak Mahindra Bank Ltd. KOTAKBANK news",
+    "Kotak Mahindra Bank Ltd. order win OR partnership OR contract",
+    "Kotak Mahindra Bank Ltd. brokerage upgrade OR price target",
+    "Kotak Mahindra Bank Ltd. results OR turnaround OR margin",
+    "Kotak Mahindra Bank Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "LT.NS": [
+    "Larsen & Toubro Ltd. LT news",
+    "Larsen & Toubro Ltd. order win OR partnership OR contract",
+    "Larsen & Toubro Ltd. brokerage upgrade OR price target",
+    "Larsen & Toubro Ltd. results OR turnaround OR margin",
+    "Larsen & Toubro Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "M&M.NS": [
+    "Mahindra & Mahindra Ltd. M&M news",
+    "Mahindra & Mahindra Ltd. order win OR partnership OR contract",
+    "Mahindra & Mahindra Ltd. brokerage upgrade OR price target",
+    "Mahindra & Mahindra Ltd. results OR turnaround OR margin",
+    "Mahindra & Mahindra Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "NESTLEIND.NS": [
+    "Nestle India Ltd. NESTLEIND news",
+    "Nestle India Ltd. order win OR partnership OR contract",
+    "Nestle India Ltd. brokerage upgrade OR price target",
+    "Nestle India Ltd. results OR turnaround OR margin",
+    "Nestle India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "RELIANCE.NS": [
+    "Reliance Industries Ltd. RELIANCE news",
+    "Reliance Industries Ltd. order win OR partnership OR contract",
+    "Reliance Industries Ltd. brokerage upgrade OR price target",
+    "Reliance Industries Ltd. results OR turnaround OR margin",
+    "Reliance Industries Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "SBIN.NS": [
+    "State Bank of India SBIN news",
+    "State Bank of India order win OR partnership OR contract",
+    "State Bank of India brokerage upgrade OR price target",
+    "State Bank of India results OR turnaround OR margin",
+    "State Bank of India stake OR fundraise OR debt reduction"
+  ],
+  "SUNPHARMA.NS": [
+    "Sun Pharmaceutical Industries Ltd. SUNPHARMA news",
+    "Sun Pharmaceutical Industries Ltd. order win OR partnership OR contract",
+    "Sun Pharmaceutical Industries Ltd. brokerage upgrade OR price target",
+    "Sun Pharmaceutical Industries Ltd. results OR turnaround OR margin",
+    "Sun Pharmaceutical Industries Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "TCS.NS": [
+    "Tata Consultancy Services Ltd. TCS news",
+    "Tata Consultancy Services Ltd. order win OR partnership OR contract",
+    "Tata Consultancy Services Ltd. brokerage upgrade OR price target",
+    "Tata Consultancy Services Ltd. results OR turnaround OR margin",
+    "Tata Consultancy Services Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "TATACONSUM.NS": [
+    "Tata Consumer Products Ltd. TATACONSUM news",
+    "Tata Consumer Products Ltd. order win OR partnership OR contract",
+    "Tata Consumer Products Ltd. brokerage upgrade OR price target",
+    "Tata Consumer Products Ltd. results OR turnaround OR margin",
+    "Tata Consumer Products Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "TECHM.NS": [
+    "Tech Mahindra Ltd. TECHM news",
+    "Tech Mahindra Ltd. order win OR partnership OR contract",
+    "Tech Mahindra Ltd. brokerage upgrade OR price target",
+    "Tech Mahindra Ltd. results OR turnaround OR margin",
+    "Tech Mahindra Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "TITAN.NS": [
+    "Titan Company Ltd. TITAN news",
+    "Titan Company Ltd. order win OR partnership OR contract",
+    "Titan Company Ltd. brokerage upgrade OR price target",
+    "Titan Company Ltd. results OR turnaround OR margin",
+    "Titan Company Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "TRENT.NS": [
+    "Trent Ltd. TRENT news",
+    "Trent Ltd. order win OR partnership OR contract",
+    "Trent Ltd. brokerage upgrade OR price target",
+    "Trent Ltd. results OR turnaround OR margin",
+    "Trent Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "ULTRACEMCO.NS": [
+    "UltraTech Cement Ltd. ULTRACEMCO news",
+    "UltraTech Cement Ltd. order win OR partnership OR contract",
+    "UltraTech Cement Ltd. brokerage upgrade OR price target",
+    "UltraTech Cement Ltd. results OR turnaround OR margin",
+    "UltraTech Cement Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "ABB.NS": [
+    "ABB India Ltd. ABB news",
+    "ABB India Ltd. order win OR partnership OR contract",
+    "ABB India Ltd. brokerage upgrade OR price target",
+    "ABB India Ltd. results OR turnaround OR margin",
+    "ABB India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "ADANIGREEN.NS": [
+    "Adani Green Energy Ltd. ADANIGREEN news",
+    "Adani Green Energy Ltd. order win OR partnership OR contract",
+    "Adani Green Energy Ltd. brokerage upgrade OR price target",
+    "Adani Green Energy Ltd. results OR turnaround OR margin",
+    "Adani Green Energy Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "BANKBARODA.NS": [
+    "Bank of Baroda BANKBARODA news",
+    "Bank of Baroda order win OR partnership OR contract",
+    "Bank of Baroda brokerage upgrade OR price target",
+    "Bank of Baroda results OR turnaround OR margin",
+    "Bank of Baroda stake OR fundraise OR debt reduction"
+  ],
+  "BOSCHLTD.NS": [
+    "Bosch Ltd. BOSCHLTD news",
+    "Bosch Ltd. order win OR partnership OR contract",
+    "Bosch Ltd. brokerage upgrade OR price target",
+    "Bosch Ltd. results OR turnaround OR margin",
+    "Bosch Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "BRITANNIA.NS": [
+    "Britannia Industries Ltd. BRITANNIA news",
+    "Britannia Industries Ltd. order win OR partnership OR contract",
+    "Britannia Industries Ltd. brokerage upgrade OR price target",
+    "Britannia Industries Ltd. results OR turnaround OR margin",
+    "Britannia Industries Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "CANBK.NS": [
+    "Canara Bank CANBK news",
+    "Canara Bank order win OR partnership OR contract",
+    "Canara Bank brokerage upgrade OR price target",
+    "Canara Bank results OR turnaround OR margin",
+    "Canara Bank stake OR fundraise OR debt reduction"
+  ],
+  "CHOLAFIN.NS": [
+    "Cholamandalam Investment and Finance Company Ltd. CHOLAFIN news",
+    "Cholamandalam Investment and Finance Company Ltd. order win OR partnership OR contract",
+    "Cholamandalam Investment and Finance Company Ltd. brokerage upgrade OR price target",
+    "Cholamandalam Investment and Finance Company Ltd. results OR turnaround OR margin",
+    "Cholamandalam Investment and Finance Company Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "CUMMINSIND.NS": [
+    "Cummins India Ltd. CUMMINSIND news",
+    "Cummins India Ltd. order win OR partnership OR contract",
+    "Cummins India Ltd. brokerage upgrade OR price target",
+    "Cummins India Ltd. results OR turnaround OR margin",
+    "Cummins India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "DLF.NS": [
+    "DLF Ltd. DLF news",
+    "DLF Ltd. order win OR partnership OR contract",
+    "DLF Ltd. brokerage upgrade OR price target",
+    "DLF Ltd. results OR turnaround OR margin",
+    "DLF Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "DIVISLAB.NS": [
+    "Divi's Laboratories Ltd. DIVISLAB news",
+    "Divi's Laboratories Ltd. order win OR partnership OR contract",
+    "Divi's Laboratories Ltd. brokerage upgrade OR price target",
+    "Divi's Laboratories Ltd. results OR turnaround OR margin",
+    "Divi's Laboratories Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "GAIL.NS": [
+    "GAIL (India) Ltd. GAIL news",
+    "GAIL (India) Ltd. order win OR partnership OR contract",
+    "GAIL (India) Ltd. brokerage upgrade OR price target",
+    "GAIL (India) Ltd. results OR turnaround OR margin",
+    "GAIL (India) Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "HDFCAMC.NS": [
+    "HDFC Asset Management Company Ltd. HDFCAMC news",
+    "HDFC Asset Management Company Ltd. order win OR partnership OR contract",
+    "HDFC Asset Management Company Ltd. brokerage upgrade OR price target",
+    "HDFC Asset Management Company Ltd. results OR turnaround OR margin",
+    "HDFC Asset Management Company Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "HINDZINC.NS": [
+    "Hindustan Zinc Ltd. HINDZINC news",
+    "Hindustan Zinc Ltd. order win OR partnership OR contract",
+    "Hindustan Zinc Ltd. brokerage upgrade OR price target",
+    "Hindustan Zinc Ltd. results OR turnaround OR margin",
+    "Hindustan Zinc Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "POWERINDIA.NS": [
+    "Hitachi Energy India Ltd. POWERINDIA news",
+    "Hitachi Energy India Ltd. order win OR partnership OR contract",
+    "Hitachi Energy India Ltd. brokerage upgrade OR price target",
+    "Hitachi Energy India Ltd. results OR turnaround OR margin",
+    "Hitachi Energy India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "IOC.NS": [
+    "Indian Oil Corporation Ltd. IOC news",
+    "Indian Oil Corporation Ltd. order win OR partnership OR contract",
+    "Indian Oil Corporation Ltd. brokerage upgrade OR price target",
+    "Indian Oil Corporation Ltd. results OR turnaround OR margin",
+    "Indian Oil Corporation Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "JINDALSTEL.NS": [
+    "Jindal Steel Ltd. JINDALSTEL news",
+    "Jindal Steel Ltd. order win OR partnership OR contract",
+    "Jindal Steel Ltd. brokerage upgrade OR price target",
+    "Jindal Steel Ltd. results OR turnaround OR margin",
+    "Jindal Steel Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "LTM.NS": [
+    "LTM Ltd. LTM news",
+    "LTM Ltd. order win OR partnership OR contract",
+    "LTM Ltd. brokerage upgrade OR price target",
+    "LTM Ltd. results OR turnaround OR margin",
+    "LTM Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "MAZDOCK.NS": [
+    "Mazagoan Dock Shipbuilders Ltd. MAZDOCK news",
+    "Mazagoan Dock Shipbuilders Ltd. order win OR partnership OR contract",
+    "Mazagoan Dock Shipbuilders Ltd. brokerage upgrade OR price target",
+    "Mazagoan Dock Shipbuilders Ltd. results OR turnaround OR margin",
+    "Mazagoan Dock Shipbuilders Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "POLYCAB.NS": [
+    "Polycab India Ltd. POLYCAB news",
+    "Polycab India Ltd. order win OR partnership OR contract",
+    "Polycab India Ltd. brokerage upgrade OR price target",
+    "Polycab India Ltd. results OR turnaround OR margin",
+    "Polycab India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "PNB.NS": [
+    "Punjab National Bank PNB news",
+    "Punjab National Bank order win OR partnership OR contract",
+    "Punjab National Bank brokerage upgrade OR price target",
+    "Punjab National Bank results OR turnaround OR margin",
+    "Punjab National Bank stake OR fundraise OR debt reduction"
+  ],
+  "MOTHERSON.NS": [
+    "Samvardhana Motherson International Ltd. MOTHERSON news",
+    "Samvardhana Motherson International Ltd. order win OR partnership OR contract",
+    "Samvardhana Motherson International Ltd. brokerage upgrade OR price target",
+    "Samvardhana Motherson International Ltd. results OR turnaround OR margin",
+    "Samvardhana Motherson International Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "ENRIN.NS": [
+    "Siemens Energy India Ltd. ENRIN news",
+    "Siemens Energy India Ltd. order win OR partnership OR contract",
+    "Siemens Energy India Ltd. brokerage upgrade OR price target",
+    "Siemens Energy India Ltd. results OR turnaround OR margin",
+    "Siemens Energy India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "SOLARINDS.NS": [
+    "Solar Industries India Ltd. SOLARINDS news",
+    "Solar Industries India Ltd. order win OR partnership OR contract",
+    "Solar Industries India Ltd. brokerage upgrade OR price target",
+    "Solar Industries India Ltd. results OR turnaround OR margin",
+    "Solar Industries India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "TVSMOTOR.NS": [
+    "TVS Motor Company Ltd. TVSMOTOR news",
+    "TVS Motor Company Ltd. order win OR partnership OR contract",
+    "TVS Motor Company Ltd. brokerage upgrade OR price target",
+    "TVS Motor Company Ltd. results OR turnaround OR margin",
+    "TVS Motor Company Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "TATACAP.NS": [
+    "Tata Capital Ltd. TATACAP news",
+    "Tata Capital Ltd. order win OR partnership OR contract",
+    "Tata Capital Ltd. brokerage upgrade OR price target",
+    "Tata Capital Ltd. results OR turnaround OR margin",
+    "Tata Capital Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "TATAPOWER.NS": [
+    "Tata Power Co. Ltd. TATAPOWER news",
+    "Tata Power Co. Ltd. order win OR partnership OR contract",
+    "Tata Power Co. Ltd. brokerage upgrade OR price target",
+    "Tata Power Co. Ltd. results OR turnaround OR margin",
+    "Tata Power Co. Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "UNIONBANK.NS": [
+    "Union Bank of India UNIONBANK news",
+    "Union Bank of India order win OR partnership OR contract",
+    "Union Bank of India brokerage upgrade OR price target",
+    "Union Bank of India results OR turnaround OR margin",
+    "Union Bank of India stake OR fundraise OR debt reduction"
+  ],
+  "VBL.NS": [
+    "Varun Beverages Ltd. VBL news",
+    "Varun Beverages Ltd. order win OR partnership OR contract",
+    "Varun Beverages Ltd. brokerage upgrade OR price target",
+    "Varun Beverages Ltd. results OR turnaround OR margin",
+    "Varun Beverages Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "VAML.NS": [
+    "Vedanta Aluminium Metal Ltd. VAML news",
+    "Vedanta Aluminium Metal Ltd. order win OR partnership OR contract",
+    "Vedanta Aluminium Metal Ltd. brokerage upgrade OR price target",
+    "Vedanta Aluminium Metal Ltd. results OR turnaround OR margin",
+    "Vedanta Aluminium Metal Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "WIPRO.NS": [
+    "Wipro Ltd. WIPRO news",
+    "Wipro Ltd. order win OR partnership OR contract",
+    "Wipro Ltd. brokerage upgrade OR price target",
+    "Wipro Ltd. results OR turnaround OR margin",
+    "Wipro Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "ZYDUSLIFE.NS": [
+    "Zydus Lifesciences Ltd. ZYDUSLIFE news",
+    "Zydus Lifesciences Ltd. order win OR partnership OR contract",
+    "Zydus Lifesciences Ltd. brokerage upgrade OR price target",
+    "Zydus Lifesciences Ltd. results OR turnaround OR margin",
+    "Zydus Lifesciences Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "360ONE.NS": [
+    "360 ONE WAM Ltd. 360ONE news",
+    "360 ONE WAM Ltd. order win OR partnership OR contract",
+    "360 ONE WAM Ltd. brokerage upgrade OR price target",
+    "360 ONE WAM Ltd. results OR turnaround OR margin",
+    "360 ONE WAM Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "APLAPOLLO.NS": [
+    "APL Apollo Tubes Ltd. APLAPOLLO news",
+    "APL Apollo Tubes Ltd. order win OR partnership OR contract",
+    "APL Apollo Tubes Ltd. brokerage upgrade OR price target",
+    "APL Apollo Tubes Ltd. results OR turnaround OR margin",
+    "APL Apollo Tubes Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "ABCAPITAL.NS": [
+    "Aditya Birla Capital Ltd. ABCAPITAL news",
+    "Aditya Birla Capital Ltd. order win OR partnership OR contract",
+    "Aditya Birla Capital Ltd. brokerage upgrade OR price target",
+    "Aditya Birla Capital Ltd. results OR turnaround OR margin",
+    "Aditya Birla Capital Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "ANTHEM.NS": [
+    "Anthem Biosciences Ltd. ANTHEM news",
+    "Anthem Biosciences Ltd. order win OR partnership OR contract",
+    "Anthem Biosciences Ltd. brokerage upgrade OR price target",
+    "Anthem Biosciences Ltd. results OR turnaround OR margin",
+    "Anthem Biosciences Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "APARINDS.NS": [
+    "Apar Industries Ltd. APARINDS news",
+    "Apar Industries Ltd. order win OR partnership OR contract",
+    "Apar Industries Ltd. brokerage upgrade OR price target",
+    "Apar Industries Ltd. results OR turnaround OR margin",
+    "Apar Industries Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "ASTERDM.NS": [
+    "Aster DM Quality Care Ltd. ASTERDM news",
+    "Aster DM Quality Care Ltd. order win OR partnership OR contract",
+    "Aster DM Quality Care Ltd. brokerage upgrade OR price target",
+    "Aster DM Quality Care Ltd. results OR turnaround OR margin",
+    "Aster DM Quality Care Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "AUROPHARMA.NS": [
+    "Aurobindo Pharma Ltd. AUROPHARMA news",
+    "Aurobindo Pharma Ltd. order win OR partnership OR contract",
+    "Aurobindo Pharma Ltd. brokerage upgrade OR price target",
+    "Aurobindo Pharma Ltd. results OR turnaround OR margin",
+    "Aurobindo Pharma Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "AIIL.NS": [
+    "Authum Investment & Infrastructure Ltd. AIIL news",
+    "Authum Investment & Infrastructure Ltd. order win OR partnership OR contract",
+    "Authum Investment & Infrastructure Ltd. brokerage upgrade OR price target",
+    "Authum Investment & Infrastructure Ltd. results OR turnaround OR margin",
+    "Authum Investment & Infrastructure Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "BANKINDIA.NS": [
+    "Bank of India BANKINDIA news",
+    "Bank of India order win OR partnership OR contract",
+    "Bank of India brokerage upgrade OR price target",
+    "Bank of India results OR turnaround OR margin",
+    "Bank of India stake OR fundraise OR debt reduction"
+  ],
+  "MAHABANK.NS": [
+    "Bank of Maharashtra MAHABANK news",
+    "Bank of Maharashtra order win OR partnership OR contract",
+    "Bank of Maharashtra brokerage upgrade OR price target",
+    "Bank of Maharashtra results OR turnaround OR margin",
+    "Bank of Maharashtra stake OR fundraise OR debt reduction"
+  ],
+  "BHEL.NS": [
+    "Bharat Heavy Electricals Ltd. BHEL news",
+    "Bharat Heavy Electricals Ltd. order win OR partnership OR contract",
+    "Bharat Heavy Electricals Ltd. brokerage upgrade OR price target",
+    "Bharat Heavy Electricals Ltd. results OR turnaround OR margin",
+    "Bharat Heavy Electricals Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "BHARTIHEXA.NS": [
+    "Bharti Hexacom Ltd. BHARTIHEXA news",
+    "Bharti Hexacom Ltd. order win OR partnership OR contract",
+    "Bharti Hexacom Ltd. brokerage upgrade OR price target",
+    "Bharti Hexacom Ltd. results OR turnaround OR margin",
+    "Bharti Hexacom Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "GROWW.NS": [
+    "Billionbrains Garage Ventures Ltd. GROWW news",
+    "Billionbrains Garage Ventures Ltd. order win OR partnership OR contract",
+    "Billionbrains Garage Ventures Ltd. brokerage upgrade OR price target",
+    "Billionbrains Garage Ventures Ltd. results OR turnaround OR margin",
+    "Billionbrains Garage Ventures Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "COFORGE.NS": [
+    "Coforge Ltd. COFORGE news",
+    "Coforge Ltd. order win OR partnership OR contract",
+    "Coforge Ltd. brokerage upgrade OR price target",
+    "Coforge Ltd. results OR turnaround OR margin",
+    "Coforge Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "COLPAL.NS": [
+    "Colgate Palmolive (India) Ltd. COLPAL news",
+    "Colgate Palmolive (India) Ltd. order win OR partnership OR contract",
+    "Colgate Palmolive (India) Ltd. brokerage upgrade OR price target",
+    "Colgate Palmolive (India) Ltd. results OR turnaround OR margin",
+    "Colgate Palmolive (India) Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "DABUR.NS": [
+    "Dabur India Ltd. DABUR news",
+    "Dabur India Ltd. order win OR partnership OR contract",
+    "Dabur India Ltd. brokerage upgrade OR price target",
+    "Dabur India Ltd. results OR turnaround OR margin",
+    "Dabur India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "EXIDEIND.NS": [
+    "Exide Industries Ltd. EXIDEIND news",
+    "Exide Industries Ltd. order win OR partnership OR contract",
+    "Exide Industries Ltd. brokerage upgrade OR price target",
+    "Exide Industries Ltd. results OR turnaround OR margin",
+    "Exide Industries Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "NYKAA.NS": [
+    "FSN E-Commerce Ventures Ltd. NYKAA news",
+    "FSN E-Commerce Ventures Ltd. order win OR partnership OR contract",
+    "FSN E-Commerce Ventures Ltd. brokerage upgrade OR price target",
+    "FSN E-Commerce Ventures Ltd. results OR turnaround OR margin",
+    "FSN E-Commerce Ventures Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "FEDERALBNK.NS": [
+    "Federal Bank Ltd. FEDERALBNK news",
+    "Federal Bank Ltd. order win OR partnership OR contract",
+    "Federal Bank Ltd. brokerage upgrade OR price target",
+    "Federal Bank Ltd. results OR turnaround OR margin",
+    "Federal Bank Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "GVT&D.NS": [
+    "GE Vernova T&D India Ltd. GVT&D news",
+    "GE Vernova T&D India Ltd. order win OR partnership OR contract",
+    "GE Vernova T&D India Ltd. brokerage upgrade OR price target",
+    "GE Vernova T&D India Ltd. results OR turnaround OR margin",
+    "GE Vernova T&D India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "GLAXO.NS": [
+    "Glaxosmithkline Pharmaceuticals Ltd. GLAXO news",
+    "Glaxosmithkline Pharmaceuticals Ltd. order win OR partnership OR contract",
+    "Glaxosmithkline Pharmaceuticals Ltd. brokerage upgrade OR price target",
+    "Glaxosmithkline Pharmaceuticals Ltd. results OR turnaround OR margin",
+    "Glaxosmithkline Pharmaceuticals Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "GLENMARK.NS": [
+    "Glenmark Pharmaceuticals Ltd. GLENMARK news",
+    "Glenmark Pharmaceuticals Ltd. order win OR partnership OR contract",
+    "Glenmark Pharmaceuticals Ltd. brokerage upgrade OR price target",
+    "Glenmark Pharmaceuticals Ltd. results OR turnaround OR margin",
+    "Glenmark Pharmaceuticals Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "MEDANTA.NS": [
+    "Global Health Ltd. MEDANTA news",
+    "Global Health Ltd. order win OR partnership OR contract",
+    "Global Health Ltd. brokerage upgrade OR price target",
+    "Global Health Ltd. results OR turnaround OR margin",
+    "Global Health Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "GODREJIND.NS": [
+    "Godrej Industries Ltd. GODREJIND news",
+    "Godrej Industries Ltd. order win OR partnership OR contract",
+    "Godrej Industries Ltd. brokerage upgrade OR price target",
+    "Godrej Industries Ltd. results OR turnaround OR margin",
+    "Godrej Industries Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "FLUOROCHEM.NS": [
+    "Gujarat Fluorochemicals Ltd. FLUOROCHEM news",
+    "Gujarat Fluorochemicals Ltd. order win OR partnership OR contract",
+    "Gujarat Fluorochemicals Ltd. brokerage upgrade OR price target",
+    "Gujarat Fluorochemicals Ltd. results OR turnaround OR margin",
+    "Gujarat Fluorochemicals Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "HAVELLS.NS": [
+    "Havells India Ltd. HAVELLS news",
+    "Havells India Ltd. order win OR partnership OR contract",
+    "Havells India Ltd. brokerage upgrade OR price target",
+    "Havells India Ltd. results OR turnaround OR margin",
+    "Havells India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "HEXT.NS": [
+    "Hexaware Technologies Ltd. HEXT news",
+    "Hexaware Technologies Ltd. order win OR partnership OR contract",
+    "Hexaware Technologies Ltd. brokerage upgrade OR price target",
+    "Hexaware Technologies Ltd. results OR turnaround OR margin",
+    "Hexaware Technologies Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "HINDCOPPER.NS": [
+    "Hindustan Copper Ltd. HINDCOPPER news",
+    "Hindustan Copper Ltd. order win OR partnership OR contract",
+    "Hindustan Copper Ltd. brokerage upgrade OR price target",
+    "Hindustan Copper Ltd. results OR turnaround OR margin",
+    "Hindustan Copper Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "HINDPETRO.NS": [
+    "Hindustan Petroleum Corporation Ltd. HINDPETRO news",
+    "Hindustan Petroleum Corporation Ltd. order win OR partnership OR contract",
+    "Hindustan Petroleum Corporation Ltd. brokerage upgrade OR price target",
+    "Hindustan Petroleum Corporation Ltd. results OR turnaround OR margin",
+    "Hindustan Petroleum Corporation Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "ITCHOTELS.NS": [
+    "ITC Hotels Ltd. ITCHOTELS news",
+    "ITC Hotels Ltd. order win OR partnership OR contract",
+    "ITC Hotels Ltd. brokerage upgrade OR price target",
+    "ITC Hotels Ltd. results OR turnaround OR margin",
+    "ITC Hotels Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "INDIANB.NS": [
+    "Indian Bank INDIANB news",
+    "Indian Bank order win OR partnership OR contract",
+    "Indian Bank brokerage upgrade OR price target",
+    "Indian Bank results OR turnaround OR margin",
+    "Indian Bank stake OR fundraise OR debt reduction"
+  ],
+  "INDHOTEL.NS": [
+    "Indian Hotels Co. Ltd. INDHOTEL news",
+    "Indian Hotels Co. Ltd. order win OR partnership OR contract",
+    "Indian Hotels Co. Ltd. brokerage upgrade OR price target",
+    "Indian Hotels Co. Ltd. results OR turnaround OR margin",
+    "Indian Hotels Co. Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "IRCTC.NS": [
+    "Indian Railway Catering And Tourism Corporation Ltd. IRCTC news",
+    "Indian Railway Catering And Tourism Corporation Ltd. order win OR partnership OR contract",
+    "Indian Railway Catering And Tourism Corporation Ltd. brokerage upgrade OR price target",
+    "Indian Railway Catering And Tourism Corporation Ltd. results OR turnaround OR margin",
+    "Indian Railway Catering And Tourism Corporation Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "IPCALAB.NS": [
+    "Ipca Laboratories Ltd. IPCALAB news",
+    "Ipca Laboratories Ltd. order win OR partnership OR contract",
+    "Ipca Laboratories Ltd. brokerage upgrade OR price target",
+    "Ipca Laboratories Ltd. results OR turnaround OR margin",
+    "Ipca Laboratories Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "JSL.NS": [
+    "Jindal Stainless Ltd. JSL news",
+    "Jindal Stainless Ltd. order win OR partnership OR contract",
+    "Jindal Stainless Ltd. brokerage upgrade OR price target",
+    "Jindal Stainless Ltd. results OR turnaround OR margin",
+    "Jindal Stainless Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "KPRMILL.NS": [
+    "K.P.R. Mill Ltd. KPRMILL news",
+    "K.P.R. Mill Ltd. order win OR partnership OR contract",
+    "K.P.R. Mill Ltd. brokerage upgrade OR price target",
+    "K.P.R. Mill Ltd. results OR turnaround OR margin",
+    "K.P.R. Mill Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "KALYANKJIL.NS": [
+    "Kalyan Jewellers India Ltd. KALYANKJIL news",
+    "Kalyan Jewellers India Ltd. order win OR partnership OR contract",
+    "Kalyan Jewellers India Ltd. brokerage upgrade OR price target",
+    "Kalyan Jewellers India Ltd. results OR turnaround OR margin",
+    "Kalyan Jewellers India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "LTTS.NS": [
+    "L&T Technology Services Ltd. LTTS news",
+    "L&T Technology Services Ltd. order win OR partnership OR contract",
+    "L&T Technology Services Ltd. brokerage upgrade OR price target",
+    "L&T Technology Services Ltd. results OR turnaround OR margin",
+    "L&T Technology Services Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "LGEINDIA.NS": [
+    "LG Electronics India Ltd. LGEINDIA news",
+    "LG Electronics India Ltd. order win OR partnership OR contract",
+    "LG Electronics India Ltd. brokerage upgrade OR price target",
+    "LG Electronics India Ltd. results OR turnaround OR margin",
+    "LG Electronics India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "LICHSGFIN.NS": [
+    "LIC Housing Finance Ltd. LICHSGFIN news",
+    "LIC Housing Finance Ltd. order win OR partnership OR contract",
+    "LIC Housing Finance Ltd. brokerage upgrade OR price target",
+    "LIC Housing Finance Ltd. results OR turnaround OR margin",
+    "LIC Housing Finance Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "LAURUSLABS.NS": [
+    "Laurus Labs Ltd. LAURUSLABS news",
+    "Laurus Labs Ltd. order win OR partnership OR contract",
+    "Laurus Labs Ltd. brokerage upgrade OR price target",
+    "Laurus Labs Ltd. results OR turnaround OR margin",
+    "Laurus Labs Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "LENSKART.NS": [
+    "Lenskart Solutions Ltd. LENSKART news",
+    "Lenskart Solutions Ltd. order win OR partnership OR contract",
+    "Lenskart Solutions Ltd. brokerage upgrade OR price target",
+    "Lenskart Solutions Ltd. results OR turnaround OR margin",
+    "Lenskart Solutions Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "LINDEINDIA.NS": [
+    "Linde India Ltd. LINDEINDIA news",
+    "Linde India Ltd. order win OR partnership OR contract",
+    "Linde India Ltd. brokerage upgrade OR price target",
+    "Linde India Ltd. results OR turnaround OR margin",
+    "Linde India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "LODHA.NS": [
+    "Lodha Developers Ltd. LODHA news",
+    "Lodha Developers Ltd. order win OR partnership OR contract",
+    "Lodha Developers Ltd. brokerage upgrade OR price target",
+    "Lodha Developers Ltd. results OR turnaround OR margin",
+    "Lodha Developers Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "MANKIND.NS": [
+    "Mankind Pharma Ltd. MANKIND news",
+    "Mankind Pharma Ltd. order win OR partnership OR contract",
+    "Mankind Pharma Ltd. brokerage upgrade OR price target",
+    "Mankind Pharma Ltd. results OR turnaround OR margin",
+    "Mankind Pharma Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "MARICO.NS": [
+    "Marico Ltd. MARICO news",
+    "Marico Ltd. order win OR partnership OR contract",
+    "Marico Ltd. brokerage upgrade OR price target",
+    "Marico Ltd. results OR turnaround OR margin",
+    "Marico Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "MEESHO.NS": [
+    "Meesho Ltd. MEESHO news",
+    "Meesho Ltd. order win OR partnership OR contract",
+    "Meesho Ltd. brokerage upgrade OR price target",
+    "Meesho Ltd. results OR turnaround OR margin",
+    "Meesho Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "MOTILALOFS.NS": [
+    "Motilal Oswal Financial Services Ltd. MOTILALOFS news",
+    "Motilal Oswal Financial Services Ltd. order win OR partnership OR contract",
+    "Motilal Oswal Financial Services Ltd. brokerage upgrade OR price target",
+    "Motilal Oswal Financial Services Ltd. results OR turnaround OR margin",
+    "Motilal Oswal Financial Services Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "MPHASIS.NS": [
+    "MphasiS Ltd. MPHASIS news",
+    "MphasiS Ltd. order win OR partnership OR contract",
+    "MphasiS Ltd. brokerage upgrade OR price target",
+    "MphasiS Ltd. results OR turnaround OR margin",
+    "MphasiS Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "MCX.NS": [
+    "Multi Commodity Exchange of India Ltd. MCX news",
+    "Multi Commodity Exchange of India Ltd. order win OR partnership OR contract",
+    "Multi Commodity Exchange of India Ltd. brokerage upgrade OR price target",
+    "Multi Commodity Exchange of India Ltd. results OR turnaround OR margin",
+    "Multi Commodity Exchange of India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "NLCINDIA.NS": [
+    "NLC India Ltd. NLCINDIA news",
+    "NLC India Ltd. order win OR partnership OR contract",
+    "NLC India Ltd. brokerage upgrade OR price target",
+    "NLC India Ltd. results OR turnaround OR margin",
+    "NLC India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "NATIONALUM.NS": [
+    "National Aluminium Co. Ltd. NATIONALUM news",
+    "National Aluminium Co. Ltd. order win OR partnership OR contract",
+    "National Aluminium Co. Ltd. brokerage upgrade OR price target",
+    "National Aluminium Co. Ltd. results OR turnaround OR margin",
+    "National Aluminium Co. Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "NAM-INDIA.NS": [
+    "Nippon Life India Asset Management Ltd. NAM-INDIA news",
+    "Nippon Life India Asset Management Ltd. order win OR partnership OR contract",
+    "Nippon Life India Asset Management Ltd. brokerage upgrade OR price target",
+    "Nippon Life India Asset Management Ltd. results OR turnaround OR margin",
+    "Nippon Life India Asset Management Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "OBEROIRLTY.NS": [
+    "Oberoi Realty Ltd. OBEROIRLTY news",
+    "Oberoi Realty Ltd. order win OR partnership OR contract",
+    "Oberoi Realty Ltd. brokerage upgrade OR price target",
+    "Oberoi Realty Ltd. results OR turnaround OR margin",
+    "Oberoi Realty Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "OIL.NS": [
+    "Oil India Ltd. OIL news",
+    "Oil India Ltd. order win OR partnership OR contract",
+    "Oil India Ltd. brokerage upgrade OR price target",
+    "Oil India Ltd. results OR turnaround OR margin",
+    "Oil India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "PAYTM.NS": [
+    "One 97 Communications Ltd. PAYTM news",
+    "One 97 Communications Ltd. order win OR partnership OR contract",
+    "One 97 Communications Ltd. brokerage upgrade OR price target",
+    "One 97 Communications Ltd. results OR turnaround OR margin",
+    "One 97 Communications Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "PAGEIND.NS": [
+    "Page Industries Ltd. PAGEIND news",
+    "Page Industries Ltd. order win OR partnership OR contract",
+    "Page Industries Ltd. brokerage upgrade OR price target",
+    "Page Industries Ltd. results OR turnaround OR margin",
+    "Page Industries Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "PATANJALI.NS": [
+    "Patanjali Foods Ltd. PATANJALI news",
+    "Patanjali Foods Ltd. order win OR partnership OR contract",
+    "Patanjali Foods Ltd. brokerage upgrade OR price target",
+    "Patanjali Foods Ltd. results OR turnaround OR margin",
+    "Patanjali Foods Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "PERSISTENT.NS": [
+    "Persistent Systems Ltd. PERSISTENT news",
+    "Persistent Systems Ltd. order win OR partnership OR contract",
+    "Persistent Systems Ltd. brokerage upgrade OR price target",
+    "Persistent Systems Ltd. results OR turnaround OR margin",
+    "Persistent Systems Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "PETRONET.NS": [
+    "Petronet LNG Ltd. PETRONET news",
+    "Petronet LNG Ltd. order win OR partnership OR contract",
+    "Petronet LNG Ltd. brokerage upgrade OR price target",
+    "Petronet LNG Ltd. results OR turnaround OR margin",
+    "Petronet LNG Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "PHOENIXLTD.NS": [
+    "Phoenix Mills Ltd. PHOENIXLTD news",
+    "Phoenix Mills Ltd. order win OR partnership OR contract",
+    "Phoenix Mills Ltd. brokerage upgrade OR price target",
+    "Phoenix Mills Ltd. results OR turnaround OR margin",
+    "Phoenix Mills Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "PIRAMALFIN.NS": [
+    "Piramal Finance Ltd. PIRAMALFIN news",
+    "Piramal Finance Ltd. order win OR partnership OR contract",
+    "Piramal Finance Ltd. brokerage upgrade OR price target",
+    "Piramal Finance Ltd. results OR turnaround OR margin",
+    "Piramal Finance Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "PRESTIGE.NS": [
+    "Prestige Estates Projects Ltd. PRESTIGE news",
+    "Prestige Estates Projects Ltd. order win OR partnership OR contract",
+    "Prestige Estates Projects Ltd. brokerage upgrade OR price target",
+    "Prestige Estates Projects Ltd. results OR turnaround OR margin",
+    "Prestige Estates Projects Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "RADICO.NS": [
+    "Radico Khaitan Ltd RADICO news",
+    "Radico Khaitan Ltd order win OR partnership OR contract",
+    "Radico Khaitan Ltd brokerage upgrade OR price target",
+    "Radico Khaitan Ltd results OR turnaround OR margin",
+    "Radico Khaitan Ltd stake OR fundraise OR debt reduction"
+  ],
+  "SCHAEFFLER.NS": [
+    "Schaeffler India Ltd. SCHAEFFLER news",
+    "Schaeffler India Ltd. order win OR partnership OR contract",
+    "Schaeffler India Ltd. brokerage upgrade OR price target",
+    "Schaeffler India Ltd. results OR turnaround OR margin",
+    "Schaeffler India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "SAIL.NS": [
+    "Steel Authority of India Ltd. SAIL news",
+    "Steel Authority of India Ltd. order win OR partnership OR contract",
+    "Steel Authority of India Ltd. brokerage upgrade OR price target",
+    "Steel Authority of India Ltd. results OR turnaround OR margin",
+    "Steel Authority of India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "TATACOMM.NS": [
+    "Tata Communications Ltd. TATACOMM news",
+    "Tata Communications Ltd. order win OR partnership OR contract",
+    "Tata Communications Ltd. brokerage upgrade OR price target",
+    "Tata Communications Ltd. results OR turnaround OR margin",
+    "Tata Communications Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "UNOMINDA.NS": [
+    "UNO Minda Ltd. UNOMINDA news",
+    "UNO Minda Ltd. order win OR partnership OR contract",
+    "UNO Minda Ltd. brokerage upgrade OR price target",
+    "UNO Minda Ltd. results OR turnaround OR margin",
+    "UNO Minda Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "UBL.NS": [
+    "United Breweries Ltd. UBL news",
+    "United Breweries Ltd. order win OR partnership OR contract",
+    "United Breweries Ltd. brokerage upgrade OR price target",
+    "United Breweries Ltd. results OR turnaround OR margin",
+    "United Breweries Ltd. stake OR fundraise OR debt reduction"
+  ]
+}
