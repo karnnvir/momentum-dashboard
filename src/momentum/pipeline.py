@@ -57,11 +57,17 @@ def get_fundamentals(symbols: list[str], force_refresh: bool = False) -> pd.Data
 
     if to_fetch:
         print(f"[pipeline] refreshing fundamentals for {len(to_fetch)}/{len(symbols)} stocks...")
-        fresh = fetch_fundamentals_for_universe(to_fetch)
-        for symbol, sf in fresh.items():
-            entry = {"as_of": today.isoformat(), **{k: v for k, v in vars(sf).items() if k != "symbol"}}
-            cache[symbol] = entry
-        _save_fundamentals_cache(cache)
+        # Fetch + save incrementally (every 20 stocks) rather than all-at-once
+        # at the end: ~250 stocks x 1.5s is several minutes of scraping, and a
+        # single bad response shouldn't throw away everything fetched so far.
+        for batch_start in range(0, len(to_fetch), 20):
+            batch = to_fetch[batch_start : batch_start + 20]
+            fresh = fetch_fundamentals_for_universe(batch)
+            for symbol, sf in fresh.items():
+                entry = {"as_of": today.isoformat(), **{k: v for k, v in vars(sf).items() if k != "symbol"}}
+                cache[symbol] = entry
+            _save_fundamentals_cache(cache)
+            print(f"[pipeline]   ...{min(batch_start + 20, len(to_fetch))}/{len(to_fetch)} fundamentals saved")
 
     rows = []
     for symbol in symbols:

@@ -179,12 +179,13 @@ def score_fundamentals(sf: StockFundamentals) -> float | None:
     points = []
 
     profit_growth = _yoy_growth(sf.quarterly_profit)
-    if profit_growth and all(g is not None for g in profit_growth[-2:]):
-        accelerating = profit_growth[-1] > profit_growth[-2]
+    if profit_growth and profit_growth[-1] is not None:
         recent_growth = profit_growth[-1]
         points.append(min(max(recent_growth, -1), 1) * 50 + 50)
-        if accelerating:
-            points.append(80)
+        if len(profit_growth) >= 2 and profit_growth[-2] is not None:
+            accelerating = profit_growth[-1] > profit_growth[-2]
+            if accelerating:
+                points.append(80)
 
     # loss -> profit turnaround
     if len(sf.quarterly_profit) >= 2 and sf.quarterly_profit[-2] <= 0 < sf.quarterly_profit[-1]:
@@ -223,8 +224,12 @@ def score_fundamentals(sf: StockFundamentals) -> float | None:
 def fetch_fundamentals_for_universe(symbols: list[str]) -> dict[str, StockFundamentals]:
     results = {}
     for i, symbol in enumerate(symbols):
-        results[symbol] = fetch_fundamentals(symbol)
-        results[symbol].support_score = score_fundamentals(results[symbol])
+        sf = fetch_fundamentals(symbol)
+        try:
+            sf.support_score = score_fundamentals(sf)
+        except Exception as exc:  # noqa: BLE001 - a bad scoring input shouldn't lose the whole batch
+            sf.error = sf.error or f"score_fundamentals failed: {exc}"
+        results[symbol] = sf
         if i < len(symbols) - 1:
             time.sleep(REQUEST_DELAY_SECONDS)
     return results
