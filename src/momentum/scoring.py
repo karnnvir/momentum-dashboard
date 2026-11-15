@@ -4,6 +4,12 @@ from __future__ import annotations
 
 import pandas as pd
 
+# Design Spec changelog pointer - bump this whenever a scoring formula
+# changes anywhere in the momentum package, and add a row to the Phasing
+# doc's "Scoring methodology changelog" table.
+FORMULA_VERSION = "v1.0"
+FORMULA_VERSION_DATE = "2026-11-15"
+
 STRONG_THRESHOLD = 60  # score >= this counts as "strong" on that axis
 FLAT_THRESHOLD = 40  # momentum <= this counts as "flat" for the "not moving yet" group
 

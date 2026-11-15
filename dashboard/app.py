@@ -43,7 +43,9 @@ result = load_latest_run()
 st.title("Momentum Dashboard")
 st.caption(
     "Nifty Next 50 + Nifty Midcap 150, scored weekly for price momentum and fundamental support. "
-    "**These scores are screening signals, not buy recommendations.**"
+    "**These scores are screening signals, not buy recommendations.** "
+    "Every score is a calculated number from documented inputs — see the **Methodology** page "
+    "(sidebar) for the exact formula behind each one."
 )
 
 if result is None:
@@ -72,7 +74,8 @@ st.divider()
 # --- Sortable table of all stocks ---
 st.subheader("All stocks")
 table_cols = [
-    "ticker", "index", "momentum_score", "support_score", "group_label",
+    "ticker", "index", "momentum_score", "support_score", "catalyst_score",
+    "risk_band_label", "group_label",
     "ret_1m", "ret_3m", "early_turn_flag",
     "momentum_score_delta", "support_score_delta",
 ]
@@ -94,12 +97,19 @@ if flagged.empty:
 
 for _, row in flagged.iterrows():
     with st.container(border=True):
-        st.markdown(f"### {row['group_label']}  —  {row['name']} ({row['ticker']})")
-        c1, c2, c3, c4 = st.columns(4)
+        st.markdown(
+            f"### {row['group_label']}  —  {row['name']} ({row['ticker']})  "
+            f"&nbsp; {row.get('risk_band_label', '')}"
+        )
+        c1, c2, c3, c4, c5 = st.columns(5)
         c1.metric("Momentum", row.get("momentum_score"), row.get("momentum_score_delta"))
         c2.metric("Support", row.get("support_score"), row.get("support_score_delta"))
-        c3.metric("1M return", f"{row.get('ret_1m', 0) * 100:.1f}%" if pd.notna(row.get("ret_1m")) else "—")
-        c4.metric("3M return", f"{row.get('ret_3m', 0) * 100:.1f}%" if pd.notna(row.get("ret_3m")) else "—")
+        c3.metric("Catalyst", row.get("catalyst_score", 0))
+        c4.metric("1M return", f"{row.get('ret_1m', 0) * 100:.1f}%" if pd.notna(row.get("ret_1m")) else "—")
+        c5.metric("3M return", f"{row.get('ret_3m', 0) * 100:.1f}%" if pd.notna(row.get("ret_3m")) else "—")
+
+        if row.get("risk_active_triggers"):
+            st.caption(f"Risk triggers active: {row['risk_active_triggers']}")
 
         flags = []
         if row.get("early_turn_cross_above_50dma"):

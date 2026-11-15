@@ -18,6 +18,24 @@ NIFTY50_TICKER = "^NSEI"
 
 LOOKBACK_DAYS = 400  # enough for a trailing 200-dma plus 52-week high/low
 
+# Design Spec: Momentum Score weights, the single source of truth also
+# rendered on the dashboard's Methodology page - keep these two in sync by
+# construction, not by remembering to update both places.
+# pct_above_50dma is deliberately excluded: it's reported separately as
+# extension_pct so a fresh breakout and an already-extended move don't get
+# the same momentum treatment baked in.
+MOMENTUM_WEIGHTS = {
+    "ret_1m": 0.12,
+    "ret_3m": 0.18,
+    "ret_6m": 0.12,
+    "rs_vs_nifty_3m": 0.18,
+    "pct_above_200dma": 0.12,
+    "pct_below_52w_high": 0.14,  # closer to 0 (the high) ranks better
+    "vol_20d_over_90d": 0.14,
+}
+MOMENTUM_STRUCTURE_BONUS = 3  # higher-highs/higher-lows structure, flat points
+MOMENTUM_TREND_SLOPE_BONUS = 1.5  # per rising DMA (50d, 200d), flat points
+
 
 @dataclass
 class StockMomentum:
@@ -189,29 +207,24 @@ def score_universe(tickers: list[str]) -> pd.DataFrame:
     df = pd.DataFrame([vars(r) for r in rows])
 
     # Weighted blend of ranked sub-metrics -> momentum_score (0-100).
-    weights = {
-        "ret_1m": 0.10,
-        "ret_3m": 0.15,
-        "ret_6m": 0.10,
-        "rs_vs_nifty_3m": 0.15,
-        "pct_above_50dma": 0.10,
-        "pct_above_200dma": 0.10,
-        "pct_below_52w_high": 0.10,  # closer to 0 (the high) ranks better
-        "vol_20d_over_90d": 0.10,
-    }
     ranked = pd.DataFrame(index=df.index)
-    for col, _ in weights.items():
+    for col in MOMENTUM_WEIGHTS:
         ranked[col] = _score_from_rank(df[col])
-    blended = sum(ranked[col] * w for col, w in weights.items())
+    blended = sum(ranked[col] * w for col, w in MOMENTUM_WEIGHTS.items())
 
-    structure_bonus = df["higher_highs_lows"].fillna(False).astype(int) * 3
+    structure_bonus = df["higher_highs_lows"].fillna(False).astype(int) * MOMENTUM_STRUCTURE_BONUS
     trend_bonus = (
         df["dma50_slope_up"].fillna(False).astype(int)
         + df["dma200_slope_up"].fillna(False).astype(int)
-    ) * 1.5
+    ) * MOMENTUM_TREND_SLOPE_BONUS
 
     df["momentum_score"] = (blended + structure_bonus + trend_bonus).clip(0, 100).round(1)
     df.loc[df["error"].notna(), "momentum_score"] = np.nan
+
+    # Extension % (Design Spec): how stretched the stock is above its 50dma,
+    # kept separate from momentum_score, feeds the Risk Score's technical-
+    # exhaustion trigger in risk.py instead.
+    df["extension_pct"] = df["pct_above_50dma"]
 
     df["early_turn_flag"] = (
         df["early_turn_cross_above_50dma"]

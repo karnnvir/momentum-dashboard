@@ -28,6 +28,11 @@ HEADERS = {
 }
 REQUEST_DELAY_SECONDS = 1.5  # be polite - this is one person's weekly screen, not a crawler
 
+# Design Spec: earnings-quality discount constants, the single source of
+# truth also rendered on the dashboard's Methodology page.
+CASH_CONVERSION_THRESHOLD = 0.8  # CFO / Net Profit below this for 2+ years is the red flag
+CASH_CONVERSION_DISCOUNT_MULTIPLIER = 0.7
+
 
 @dataclass
 class StockFundamentals:
@@ -41,7 +46,10 @@ class StockFundamentals:
     quarterly_sales: list = field(default_factory=list)  # oldest -> newest
     quarterly_profit: list = field(default_factory=list)
     quarterly_opm: list = field(default_factory=list)  # operating margin %
+    annual_net_profit: list = field(default_factory=list)  # oldest -> newest
+    annual_cash_from_operations: list = field(default_factory=list)
     support_score: float | None = None
+    earnings_quality_discounted: bool = False
     error: str | None = None
 
 
@@ -84,6 +92,30 @@ def _parse_quarterly_series(soup: BeautifulSoup, row_label: str) -> list[float]:
     return values
 
 
+def _parse_annual_series(soup: BeautifulSoup, section_id: str, row_label: str) -> list[float]:
+    """Same idea as _parse_quarterly_series but for an annual table
+    (profit-loss, cash-flow, balance-sheet sections on screener.in)."""
+    table = soup.find("section", id=section_id)
+    if table is None:
+        return []
+    row = table.find("tr", string=re.compile(re.escape(row_label), re.I))
+    if row is None:
+        for r in table.find_all("tr"):
+            if row_label.lower() in r.get_text(" ", strip=True).lower():
+                row = r
+                break
+    if row is None:
+        return []
+    values = []
+    for cell in row.find_all("td")[1:]:
+        text = cell.get_text(strip=True).replace(",", "")
+        try:
+            values.append(float(text))
+        except ValueError:
+            continue
+    return values
+
+
 def fetch_fundamentals(symbol: str) -> StockFundamentals:
     sf = StockFundamentals(symbol=symbol)
     try:
@@ -102,6 +134,11 @@ def fetch_fundamentals(symbol: str) -> StockFundamentals:
         sf.quarterly_profit = _parse_quarterly_series(soup, "Net Profit")
         sf.quarterly_opm = _parse_quarterly_series(soup, "OPM")
 
+        sf.annual_net_profit = _parse_annual_series(soup, "profit-loss", "Net Profit")
+        sf.annual_cash_from_operations = _parse_annual_series(
+            soup, "cash-flow", "Cash from Operating Activity"
+        )
+
     except Exception as exc:  # noqa: BLE001
         sf.error = str(exc)
 
@@ -116,6 +153,20 @@ def _yoy_growth(series: list[float]) -> list[float]:
         (series[i] / series[i - 4] - 1.0) if series[i - 4] else None
         for i in range(4, len(series))
     ]
+
+
+def cash_conversion_ratios(sf: StockFundamentals) -> list[float]:
+    """CFO / Net Profit per year, oldest -> newest. Design Spec's earnings-
+    quality check: a ratio sustained below 0.8 means reported profit isn't
+    showing up as cash, the Sloan-accrual red flag."""
+    years = min(len(sf.annual_net_profit), len(sf.annual_cash_from_operations))
+    ratios = []
+    for i in range(years):
+        ni = sf.annual_net_profit[-years + i]
+        cfo = sf.annual_cash_from_operations[-years + i]
+        if ni:
+            ratios.append(cfo / ni)
+    return ratios
 
 
 def score_fundamentals(sf: StockFundamentals) -> float | None:
@@ -154,7 +205,19 @@ def score_fundamentals(sf: StockFundamentals) -> float | None:
 
     if not points:
         return None
-    return round(sum(points) / len(points), 1)
+    score = sum(points) / len(points)
+
+    # Earnings-quality discount (Design Spec): CFO/NI < 0.8 for 2+
+    # consecutive years multiplies the score by 0.7, so manufactured-looking
+    # profit growth can't fake a high Support Score.
+    cfo_ratios = cash_conversion_ratios(sf)
+    sf.earnings_quality_discounted = len(cfo_ratios) >= 2 and all(
+        r < CASH_CONVERSION_THRESHOLD for r in cfo_ratios[-2:]
+    )
+    if sf.earnings_quality_discounted:
+        score *= CASH_CONVERSION_DISCOUNT_MULTIPLIER
+
+    return round(score, 1)
 
 
 def fetch_fundamentals_for_universe(symbols: list[str]) -> dict[str, StockFundamentals]:
