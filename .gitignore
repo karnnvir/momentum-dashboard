@@ -5,3 +5,4 @@ __pycache__/
 data/universe_cache/
 data/fundamentals_cache.json
 .DS_Store
+*.egg-info/
