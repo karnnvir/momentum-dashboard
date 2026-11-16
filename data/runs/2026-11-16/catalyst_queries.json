@@ -69,12 +69,12 @@
     "HDFC Bank Ltd. results OR turnaround OR margin",
     "HDFC Bank Ltd. stake OR fundraise OR debt reduction"
   ],
-  "HDFCLIFE.NS": [
-    "HDFC Life Insurance Company Ltd. HDFCLIFE news",
-    "HDFC Life Insurance Company Ltd. order win OR partnership OR contract",
-    "HDFC Life Insurance Company Ltd. brokerage upgrade OR price target",
-    "HDFC Life Insurance Company Ltd. results OR turnaround OR margin",
-    "HDFC Life Insurance Company Ltd. stake OR fundraise OR debt reduction"
+  "HINDALCO.NS": [
+    "Hindalco Industries Ltd. HINDALCO news",
+    "Hindalco Industries Ltd. order win OR partnership OR contract",
+    "Hindalco Industries Ltd. brokerage upgrade OR price target",
+    "Hindalco Industries Ltd. results OR turnaround OR margin",
+    "Hindalco Industries Ltd. stake OR fundraise OR debt reduction"
   ],
   "ICICIBANK.NS": [
     "ICICI Bank Ltd. ICICIBANK news",
@@ -664,6 +664,13 @@
     "Lloyds Metals And Energy Ltd. results OR turnaround OR margin",
     "Lloyds Metals And Energy Ltd. stake OR fundraise OR debt reduction"
   ],
+  "LODHA.NS": [
+    "Lodha Developers Ltd. LODHA news",
+    "Lodha Developers Ltd. order win OR partnership OR contract",
+    "Lodha Developers Ltd. brokerage upgrade OR price target",
+    "Lodha Developers Ltd. results OR turnaround OR margin",
+    "Lodha Developers Ltd. stake OR fundraise OR debt reduction"
+  ],
   "MANKIND.NS": [
     "Mankind Pharma Ltd. MANKIND news",
     "Mankind Pharma Ltd. order win OR partnership OR contract",
@@ -705,6 +712,13 @@
     "NLC India Ltd. brokerage upgrade OR price target",
     "NLC India Ltd. results OR turnaround OR margin",
     "NLC India Ltd. stake OR fundraise OR debt reduction"
+  ],
+  "NH.NS": [
+    "Narayana Hrudayalaya Ltd. NH news",
+    "Narayana Hrudayalaya Ltd. order win OR partnership OR contract",
+    "Narayana Hrudayalaya Ltd. brokerage upgrade OR price target",
+    "Narayana Hrudayalaya Ltd. results OR turnaround OR margin",
+    "Narayana Hrudayalaya Ltd. stake OR fundraise OR debt reduction"
   ],
   "NATIONALUM.NS": [
     "National Aluminium Co. Ltd. NATIONALUM news",

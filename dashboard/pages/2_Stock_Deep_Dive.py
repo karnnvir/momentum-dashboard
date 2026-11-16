@@ -84,6 +84,15 @@ compared_to = row.get("compared_to_run_date")
 if (pd.notna(momentum_delta) or pd.notna(support_delta)) and pd.notna(compared_to):
     st.caption(f"Momentum/Support deltas are vs the {compared_to} run.")
 
+if pd.notna(row.get("analyst_consensus_score")):
+    st.caption(
+        f"Analyst consensus: {row['analyst_consensus_score']}/100 "
+        f"({row.get('analyst_avg_reco_text', '—')}, {int(row.get('analyst_count', 0))} analysts, "
+        f"as of {row.get('analyst_consensus_as_of', '—')}) — informational, not yet part of Overall Score. "
+        "Mutual-fund-holding trend (the other half of the originally-planned Institutional Score) "
+        "needs a Trendlyne account - not built."
+    )
+
 peg_ratio = row.get("peg_ratio")
 if pd.notna(peg_ratio):
     st.caption(

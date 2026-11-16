@@ -130,8 +130,8 @@ st.divider()
 st.subheader("All stocks")
 table_cols = [
     "is_held", "ticker", "index", "sector", "overall_score", "momentum_score", "support_score",
-    "catalyst_score", "risk_score", "risk_band_label", "group_label", "sector_state_label",
-    "relative_value_label", "ret_1m", "ret_3m", "early_turn_flag",
+    "catalyst_score", "analyst_consensus_score", "risk_score", "risk_band_label", "group_label",
+    "sector_state_label", "relative_value_label", "ret_1m", "ret_3m", "early_turn_flag",
     "momentum_score_delta", "support_score_delta",
 ]
 display_df = df[[c for c in table_cols if c in df.columns]].copy()
@@ -209,6 +209,13 @@ for _, row in flagged.iterrows():
         compared_to = row.get("compared_to_run_date")
         if (pd.notna(momentum_delta) or pd.notna(support_delta)) and pd.notna(compared_to):
             st.caption(f"Momentum/Support deltas are vs the {compared_to} run.")
+
+        if pd.notna(row.get("analyst_consensus_score")):
+            st.caption(
+                f"Analyst consensus: {row['analyst_consensus_score']}/100 "
+                f"({row.get('analyst_avg_reco_text', '—')}, {int(row.get('analyst_count', 0))} analysts, "
+                f"as of {row.get('analyst_consensus_as_of', '—')}) — informational, not yet part of Overall Score."
+            )
 
         if row.get("risk_active_triggers"):
             st.caption(f"Risk triggers active: {row['risk_active_triggers']}")

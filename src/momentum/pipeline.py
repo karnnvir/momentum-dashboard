@@ -28,11 +28,14 @@ from momentum import catalysts as cat
 from momentum import risk
 from momentum import sector as sec
 from momentum import holdings as hold
+from momentum import analyst_consensus as ac
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 RUNS_DIR = DATA_DIR / "runs"
 FUNDAMENTALS_CACHE = DATA_DIR / "fundamentals_cache.json"
 FUNDAMENTALS_MAX_AGE_DAYS = 75
+ANALYST_CONSENSUS_CACHE = DATA_DIR / "analyst_consensus_cache.json"
+ANALYST_CONSENSUS_MAX_AGE_DAYS = 75  # same cadence as fundamentals - broker reports trickle in over weeks, not daily
 
 
 def _load_fundamentals_cache() -> dict:
@@ -85,6 +88,64 @@ def get_fundamentals(symbols: list[str], force_refresh: bool = False) -> pd.Data
                 "sector": entry.get("sector"),
                 "pe_ratio": entry.get("pe_ratio"),
                 "recent_profit_growth_pct": entry.get("recent_profit_growth_pct"),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def _load_analyst_consensus_cache() -> dict:
+    if ANALYST_CONSENSUS_CACHE.exists():
+        return json.loads(ANALYST_CONSENSUS_CACHE.read_text())
+    return {}
+
+
+def _save_analyst_consensus_cache(cache: dict) -> None:
+    ANALYST_CONSENSUS_CACHE.parent.mkdir(parents=True, exist_ok=True)
+    ANALYST_CONSENSUS_CACHE.write_text(json.dumps(cache, indent=2))
+
+
+def get_analyst_consensus(symbols: list[str], force_refresh: bool = False) -> pd.DataFrame:
+    """Phase 2 feasibility result (analyst_consensus.py): Buy/Hold/Sell
+    counts from Trendlyne, cached on the same ~75-day cadence as
+    fundamentals - broker reports accumulate over weeks, not daily. A
+    symbol with no analyst coverage (or not on Trendlyne's list at all)
+    simply has no cache entry and no row fields - never a fabricated
+    score."""
+    cache = _load_analyst_consensus_cache()
+    today = date.today()
+    stale_cutoff = today - timedelta(days=ANALYST_CONSENSUS_MAX_AGE_DAYS)
+
+    to_fetch = []
+    for symbol in symbols:
+        entry = cache.get(symbol)
+        if force_refresh or entry is None or date.fromisoformat(entry["scraped_as_of"]) < stale_cutoff:
+            to_fetch.append(symbol)
+
+    if to_fetch:
+        print(f"[pipeline] refreshing analyst consensus for {len(to_fetch)}/{len(symbols)} stocks...")
+        for batch_start in range(0, len(to_fetch), 20):
+            batch = to_fetch[batch_start : batch_start + 20]
+            fresh, failed = ac.fetch_analyst_consensus_for_universe(batch)
+            for symbol in batch:
+                if symbol in failed:
+                    continue  # transient failure - leave uncached so it's retried next run
+                data = fresh.get(symbol)
+                cache[symbol] = {"scraped_as_of": today.isoformat(), **data} if data else {
+                    "scraped_as_of": today.isoformat()
+                }
+            _save_analyst_consensus_cache(cache)
+            print(f"[pipeline]   ...{min(batch_start + 20, len(to_fetch))}/{len(to_fetch)} analyst consensus saved")
+
+    rows = []
+    for symbol in symbols:
+        entry = cache.get(symbol, {})
+        rows.append(
+            {
+                "symbol": symbol,
+                "analyst_consensus_score": entry.get("analyst_consensus_score"),
+                "analyst_count": entry.get("analyst_count"),
+                "analyst_avg_reco_text": entry.get("analyst_avg_reco_text"),
+                "analyst_consensus_as_of": entry.get("analyst_consensus_as_of"),
             }
         )
     return pd.DataFrame(rows)
@@ -235,7 +296,11 @@ def _previous_sector_rs(exclude_date: str) -> dict[str, float] | None:
     return None
 
 
-def run(quick: int | None = None, force_fundamentals_refresh: bool = False) -> pd.DataFrame:
+def run(
+    quick: int | None = None,
+    force_fundamentals_refresh: bool = False,
+    force_analyst_consensus_refresh: bool = False,
+) -> pd.DataFrame:
     run_date = date.today().isoformat()
 
     universe = fetch_universe()
@@ -268,6 +333,11 @@ def run(quick: int | None = None, force_fundamentals_refresh: bool = False) -> p
 
     fundamentals_df = get_fundamentals(universe["symbol"].tolist(), force_refresh=force_fundamentals_refresh)
     merged = merged.merge(fundamentals_df, on="symbol", how="left")
+
+    analyst_consensus_df = get_analyst_consensus(
+        universe["symbol"].tolist(), force_refresh=force_analyst_consensus_refresh
+    )
+    merged = merged.merge(analyst_consensus_df, on="symbol", how="left")
 
     merged = classify_dataframe(merged)
 
@@ -351,6 +421,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--quick", type=int, default=None, help="limit to first N universe stocks, for smoke testing")
     parser.add_argument("--refresh-fundamentals", action="store_true")
+    parser.add_argument("--refresh-analyst-consensus", action="store_true")
     parser.add_argument(
         "--rescan",
         metavar="YYYY-MM-DD",
@@ -360,4 +431,8 @@ if __name__ == "__main__":
     if args.rescan:
         rescan_with_catalysts(args.rescan)
     else:
-        run(quick=args.quick, force_fundamentals_refresh=args.refresh_fundamentals)
+        run(
+            quick=args.quick,
+            force_fundamentals_refresh=args.refresh_fundamentals,
+            force_analyst_consensus_refresh=args.refresh_analyst_consensus,
+        )

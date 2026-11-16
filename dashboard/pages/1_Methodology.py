@@ -39,6 +39,7 @@ from momentum.risk import (  # noqa: E402
     RISK_BAND_WATCH,
     RISK_BAND_REDUCE_EXIT,
 )
+from momentum.analyst_consensus import RATING_WEIGHTS  # noqa: E402
 from momentum.sector import (  # noqa: E402
     MIN_SECTOR_SIZE,
     SECTOR_STRENGTH_PERCENTILE_THRESHOLD,
@@ -233,7 +234,30 @@ st.markdown(
 """
 )
 
-st.header("10. How to read a flagged stock")
+st.header("10. Analyst Consensus Score (informational, not in Overall Score)")
+st.write(
+    "A calculated 0-100 number from the real distribution of analyst ratings on Trendlyne "
+    "(Strong Buy/Buy/Hold/Sell/Strong Sell counts), not a single opinion or price target."
+)
+st.code("Analyst Consensus Score = round(100 x sum(count x weight) / total analysts)")
+st.dataframe(
+    pd.DataFrame([{"Rating": k.replace("_", " ").title(), "Weight": v} for k, v in RATING_WEIGHTS.items()]),
+    hide_index=True,
+    use_container_width=True,
+)
+st.markdown(
+    "**Phase 2 feasibility result:** the Design Spec's planned 'Institutional Score' was meant to "
+    "blend this with a mutual-fund-holding-count trend into one number. Checked 2026-11-16: "
+    "Trendlyne's analyst-consensus data is server-rendered and scrapable without login; its "
+    "mutual-fund-holding page is not - even a real browser gets no data for an anonymous visitor, "
+    "it requires a logged-in account. So only this half got built. It's shown as context on the "
+    "dashboard, deliberately **not** folded into the Overall Score, since the original design was "
+    "for the complete (both-halves) number to feed Support Score - folding in just one half would "
+    "overstate confidence versus what was actually designed and verified. Each score shows its own "
+    "'as of' date, since analyst reports accumulate over weeks rather than updating daily."
+)
+
+st.header("11. How to read a flagged stock")
 st.warning(
     "This is a screening checklist, not a buy signal. Nothing below is investment advice - "
     "it's a reading order for the numbers already on this dashboard, so a decision uses all "

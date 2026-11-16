@@ -4,6 +4,7 @@ __pycache__/
 .env
 data/universe_cache/
 data/fundamentals_cache.json
+data/analyst_consensus_cache.json
 .DS_Store
 *.egg-info/
 .claude/
