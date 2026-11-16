@@ -199,9 +199,17 @@ for _, row in flagged.iterrows():
         momentum_delta = row.get("momentum_score_delta")
         support_delta = row.get("support_score_delta")
         c1, c2, c3, c4, c5, c6 = st.columns(6)
-        c1.metric("Overall", row.get("overall_score"))
-        c2.metric("Momentum", row.get("momentum_score"), momentum_delta if pd.notna(momentum_delta) else None)
-        c3.metric("Support", row.get("support_score"), support_delta if pd.notna(support_delta) else None)
+        c1.metric("Overall", row.get("overall_score") if pd.notna(row.get("overall_score")) else "—")
+        c2.metric(
+            "Momentum",
+            row.get("momentum_score") if pd.notna(row.get("momentum_score")) else "—",
+            momentum_delta if pd.notna(momentum_delta) else None,
+        )
+        c3.metric(
+            "Support",
+            row.get("support_score") if pd.notna(row.get("support_score")) else "—",
+            support_delta if pd.notna(support_delta) else None,
+        )
         c4.metric("Catalyst", row.get("catalyst_score", 0))
         c5.metric("1M return", f"{row.get('ret_1m', 0) * 100:.1f}%" if pd.notna(row.get("ret_1m")) else "—")
         c6.metric("3M return", f"{row.get('ret_3m', 0) * 100:.1f}%" if pd.notna(row.get("ret_3m")) else "—")

@@ -49,7 +49,9 @@ def _save_fundamentals_cache(cache: dict) -> None:
     FUNDAMENTALS_CACHE.write_text(json.dumps(cache, indent=2))
 
 
-def get_fundamentals(symbols: list[str], force_refresh: bool = False) -> pd.DataFrame:
+def get_fundamentals(
+    symbols: list[str], force_refresh: bool = False, screener_symbol_overrides: dict[str, str] | None = None
+) -> pd.DataFrame:
     cache = _load_fundamentals_cache()
     today = date.today()
     stale_cutoff = today - timedelta(days=FUNDAMENTALS_MAX_AGE_DAYS)
@@ -67,7 +69,7 @@ def get_fundamentals(symbols: list[str], force_refresh: bool = False) -> pd.Data
         # single bad response shouldn't throw away everything fetched so far.
         for batch_start in range(0, len(to_fetch), 20):
             batch = to_fetch[batch_start : batch_start + 20]
-            fresh = fetch_fundamentals_for_universe(batch)
+            fresh = fetch_fundamentals_for_universe(batch, screener_symbol_overrides=screener_symbol_overrides)
             for symbol, sf in fresh.items():
                 entry = {"as_of": today.isoformat(), **{k: v for k, v in vars(sf).items() if k != "symbol"}}
                 cache[symbol] = entry
@@ -311,16 +313,25 @@ def run(
     # _save_run for how this is kept out of the publicly-tracked data/runs/.
     holdings_data = hold.load_my_holdings()
     has_holdings = holdings_data is not None
+    screener_symbol_overrides: dict[str, str] = {}
     if has_holdings:
         held_tickers = set(holdings_data["equities"]["ticker"])
         new_tier = holdings_data["equities"][~holdings_data["equities"]["ticker"].isin(universe["ticker"])].copy()
         new_tier["index"] = hold.MY_HOLDINGS_INDEX
         universe = pd.concat([universe, new_tier[["symbol", "name", "index", "ticker"]]], ignore_index=True)
         universe["is_held"] = universe["ticker"].isin(held_tickers)
+        # A holding whose screener_symbol diverges from its own symbol is a
+        # BSE-only stock (holdings.BSE_ONLY_OVERRIDES) - screener.in needs
+        # the override, not the yfinance/universe symbol.
+        diverging = holdings_data["equities"][
+            holdings_data["equities"]["symbol"] != holdings_data["equities"]["screener_symbol"]
+        ]
+        screener_symbol_overrides = dict(zip(diverging["symbol"], diverging["screener_symbol"]))
         print(
             f"[pipeline] My Holdings: {len(held_tickers)} tickers held, "
-            f"{len(new_tier)} added as a new tier, {len(holdings_data['funds'])} funds/ETFs "
-            f"and {len(holdings_data['unresolved'])} unresolved excluded from scoring"
+            f"{len(new_tier)} added as a new tier, {len(holdings_data['funds'])} funds/ETFs, "
+            f"{len(holdings_data['unresolved'])} unresolved excluded from scoring, "
+            f"{len(screener_symbol_overrides)} BSE-only screener.in overrides applied"
         )
     else:
         universe["is_held"] = False
@@ -331,7 +342,11 @@ def run(
     momentum_df = score_universe(universe["ticker"].tolist())
     merged = universe.merge(momentum_df, on="ticker", how="left")
 
-    fundamentals_df = get_fundamentals(universe["symbol"].tolist(), force_refresh=force_fundamentals_refresh)
+    fundamentals_df = get_fundamentals(
+        universe["symbol"].tolist(),
+        force_refresh=force_fundamentals_refresh,
+        screener_symbol_overrides=screener_symbol_overrides,
+    )
     merged = merged.merge(fundamentals_df, on="symbol", how="left")
 
     analyst_consensus_df = get_analyst_consensus(

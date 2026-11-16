@@ -17,6 +17,7 @@ RUNS_DIR = DATA_DIR / "runs"
 # publicly-tracked RUNS_DIR. Superset of the public run when present.
 HOLDINGS_RUNS_DIR = DATA_DIR / "holdings" / "runs"
 FUNDAMENTALS_CACHE = DATA_DIR / "fundamentals_cache.json"
+ANALYST_CONSENSUS_CACHE = DATA_DIR / "analyst_consensus_cache.json"
 
 
 def _run_json_path(run_date: str) -> Path:
@@ -108,3 +109,9 @@ def load_fundamentals_cache() -> dict:
     if not FUNDAMENTALS_CACHE.exists():
         return {}
     return json.loads(FUNDAMENTALS_CACHE.read_text())
+
+
+def load_analyst_consensus_cache() -> dict:
+    if not ANALYST_CONSENSUS_CACHE.exists():
+        return {}
+    return json.loads(ANALYST_CONSENSUS_CACHE.read_text())

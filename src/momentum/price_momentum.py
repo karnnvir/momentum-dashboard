@@ -207,9 +207,13 @@ def score_universe(tickers: list[str]) -> pd.DataFrame:
     df = pd.DataFrame([vars(r) for r in rows])
 
     # Weighted blend of ranked sub-metrics -> momentum_score (0-100).
+    # The per-input percentile ranks are persisted (rank_<col>) rather than
+    # discarded, so the deep-dive page can show each stock's actual
+    # contribution, not just the final blended number.
     ranked = pd.DataFrame(index=df.index)
     for col in MOMENTUM_WEIGHTS:
         ranked[col] = _score_from_rank(df[col])
+        df[f"rank_{col}"] = ranked[col].round(1)
     blended = sum(ranked[col] * w for col, w in MOMENTUM_WEIGHTS.items())
 
     structure_bonus = df["higher_highs_lows"].fillna(False).astype(int) * MOMENTUM_STRUCTURE_BONUS

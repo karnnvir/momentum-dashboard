@@ -123,10 +123,13 @@ def _parse_annual_series(soup: BeautifulSoup, section_id: str, row_label: str) -
     return values
 
 
-def fetch_fundamentals(symbol: str) -> StockFundamentals:
+def fetch_fundamentals(symbol: str, screener_symbol: str | None = None) -> StockFundamentals:
+    """screener_symbol overrides what's used to build the screener.in URL,
+    for the rare holding where it diverges from the universe `symbol` (a
+    BSE-only stock - see holdings.BSE_ONLY_OVERRIDES). Defaults to symbol."""
     sf = StockFundamentals(symbol=symbol)
     try:
-        resp = requests.get(SCREENER_URL.format(symbol=symbol), headers=HEADERS, timeout=15)
+        resp = requests.get(SCREENER_URL.format(symbol=screener_symbol or symbol), headers=HEADERS, timeout=15)
         resp.raise_for_status()
         soup = BeautifulSoup(resp.text, "lxml")
 
@@ -180,6 +183,56 @@ def cash_conversion_ratios(sf: StockFundamentals) -> list[float]:
     return ratios
 
 
+def score_fundamentals_breakdown(sf: StockFundamentals) -> list[dict]:
+    """Every point contribution that feeds score_fundamentals, labeled -
+    the single source of truth both functions share, so the Support Score
+    shown on the dashboard and the breakdown shown on the deep-dive page
+    can never drift apart. Also sets sf.recent_profit_growth_pct as a
+    side effect, same as before this was split out."""
+    if sf.error:
+        return []
+
+    breakdown: list[dict] = []
+
+    profit_growth = _yoy_growth(sf.quarterly_profit)
+    if profit_growth and profit_growth[-1] is not None:
+        recent_growth = profit_growth[-1]
+        sf.recent_profit_growth_pct = round(recent_growth * 100, 1)
+        pts = min(max(recent_growth, -1), 1) * 50 + 50
+        breakdown.append(
+            {"label": "Recent YoY profit growth", "detail": f"{recent_growth:+.1%}", "points": round(pts, 1)}
+        )
+        if len(profit_growth) >= 2 and profit_growth[-2] is not None:
+            accelerating = profit_growth[-1] > profit_growth[-2]
+            if accelerating:
+                breakdown.append({"label": "Profit growth accelerating", "detail": "yes", "points": 80.0})
+
+    # loss -> profit turnaround
+    if len(sf.quarterly_profit) >= 2 and sf.quarterly_profit[-2] <= 0 < sf.quarterly_profit[-1]:
+        breakdown.append({"label": "Loss-to-profit turnaround", "detail": "yes", "points": 90.0})
+
+    if len(sf.quarterly_opm) >= 2:
+        margin_delta = sf.quarterly_opm[-1] - sf.quarterly_opm[-2]
+        pts = min(max(margin_delta, -10), 10) * 3 + 50
+        breakdown.append(
+            {"label": "Operating margin change (QoQ)", "detail": f"{margin_delta:+.1f}pp", "points": round(pts, 1)}
+        )
+
+    if sf.roce is not None:
+        pts = min(max(sf.roce, 0), 40) / 40 * 100
+        breakdown.append({"label": "ROCE", "detail": f"{sf.roce:.1f}%", "points": round(pts, 1)})
+
+    if sf.debt_to_equity is not None:
+        pts = max(0, 100 - sf.debt_to_equity * 50)
+        breakdown.append({"label": "Debt to equity", "detail": f"{sf.debt_to_equity:.2f}", "points": round(pts, 1)})
+
+    if sf.promoter_pledge is not None:
+        pts = max(0, 100 - sf.promoter_pledge * 4)
+        breakdown.append({"label": "Promoter pledge", "detail": f"{sf.promoter_pledge:.1f}%", "points": round(pts, 1)})
+
+    return breakdown
+
+
 def score_fundamentals(sf: StockFundamentals) -> float | None:
     """Rough 0-100 support score from the raw fundamentals. This is a
     starting heuristic, not calibrated against outcomes yet - revisit the
@@ -187,38 +240,10 @@ def score_fundamentals(sf: StockFundamentals) -> float | None:
     if sf.error:
         return None
 
-    points = []
-
-    profit_growth = _yoy_growth(sf.quarterly_profit)
-    if profit_growth and profit_growth[-1] is not None:
-        recent_growth = profit_growth[-1]
-        sf.recent_profit_growth_pct = round(recent_growth * 100, 1)
-        points.append(min(max(recent_growth, -1), 1) * 50 + 50)
-        if len(profit_growth) >= 2 and profit_growth[-2] is not None:
-            accelerating = profit_growth[-1] > profit_growth[-2]
-            if accelerating:
-                points.append(80)
-
-    # loss -> profit turnaround
-    if len(sf.quarterly_profit) >= 2 and sf.quarterly_profit[-2] <= 0 < sf.quarterly_profit[-1]:
-        points.append(90)
-
-    if len(sf.quarterly_opm) >= 2:
-        margin_delta = sf.quarterly_opm[-1] - sf.quarterly_opm[-2]
-        points.append(min(max(margin_delta, -10), 10) * 3 + 50)
-
-    if sf.roce is not None:
-        points.append(min(max(sf.roce, 0), 40) / 40 * 100)
-
-    if sf.debt_to_equity is not None:
-        points.append(max(0, 100 - sf.debt_to_equity * 50))
-
-    if sf.promoter_pledge is not None:
-        points.append(max(0, 100 - sf.promoter_pledge * 4))
-
-    if not points:
+    breakdown = score_fundamentals_breakdown(sf)
+    if not breakdown:
         return None
-    score = sum(points) / len(points)
+    score = sum(b["points"] for b in breakdown) / len(breakdown)
 
     # Earnings-quality discount (Design Spec): CFO/NI < 0.8 for 2+
     # consecutive years multiplies the score by 0.7, so manufactured-looking
@@ -233,10 +258,13 @@ def score_fundamentals(sf: StockFundamentals) -> float | None:
     return round(score, 1)
 
 
-def fetch_fundamentals_for_universe(symbols: list[str]) -> dict[str, StockFundamentals]:
+def fetch_fundamentals_for_universe(
+    symbols: list[str], screener_symbol_overrides: dict[str, str] | None = None
+) -> dict[str, StockFundamentals]:
+    overrides = screener_symbol_overrides or {}
     results = {}
     for i, symbol in enumerate(symbols):
-        sf = fetch_fundamentals(symbol)
+        sf = fetch_fundamentals(symbol, screener_symbol=overrides.get(symbol))
         try:
             sf.support_score = score_fundamentals(sf)
         except Exception as exc:  # noqa: BLE001 - a bad scoring input shouldn't lose the whole batch
