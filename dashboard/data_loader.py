@@ -13,7 +13,20 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 RUNS_DIR = DATA_DIR / "runs"
+# Gitignored: "My Holdings" tier + is_held flag live only here, never in the
+# publicly-tracked RUNS_DIR. Superset of the public run when present.
+HOLDINGS_RUNS_DIR = DATA_DIR / "holdings" / "runs"
 FUNDAMENTALS_CACHE = DATA_DIR / "fundamentals_cache.json"
+
+
+def _run_json_path(run_date: str) -> Path:
+    private = HOLDINGS_RUNS_DIR / run_date / "run.json"
+    return private if private.exists() else RUNS_DIR / run_date / "run.json"
+
+
+def _run_csv_path(run_date: str) -> Path:
+    private = HOLDINGS_RUNS_DIR / run_date / "run.csv"
+    return private if private.exists() else RUNS_DIR / run_date / "run.csv"
 
 
 def load_latest_run() -> tuple[str, pd.DataFrame, list[dict]] | None:
@@ -25,13 +38,28 @@ def load_latest_run() -> tuple[str, pd.DataFrame, list[dict]] | None:
 
 
 def load_run(run_date: str) -> tuple[str, pd.DataFrame, list[dict]] | None:
-    run_path = RUNS_DIR / run_date / "run.json"
+    run_path = _run_json_path(run_date)
     if not run_path.exists():
         return None
     df = pd.DataFrame(json.loads(run_path.read_text()))
+    if "is_held" not in df.columns:
+        df["is_held"] = False
+
     catalysts_path = RUNS_DIR / run_date / "catalysts.json"
     catalysts = json.loads(catalysts_path.read_text()) if catalysts_path.exists() else []
+    private_catalysts_path = HOLDINGS_RUNS_DIR / run_date / "catalysts.json"
+    if private_catalysts_path.exists():
+        catalysts += json.loads(private_catalysts_path.read_text())
     return run_date, df, catalysts
+
+
+def load_excluded_holdings(run_date: str) -> dict | None:
+    """Funds/ETFs and unresolved holdings for this run - names only, no
+    quantity/cost/value. None if no holdings file has ever been processed."""
+    path = HOLDINGS_RUNS_DIR / run_date / "excluded_holdings.json"
+    if not path.exists():
+        return None
+    return json.loads(path.read_text())
 
 
 def catalysts_by_ticker(catalyst_records: list[dict]) -> dict[str, list[dict]]:
@@ -55,8 +83,7 @@ def score_history(ticker: str) -> pd.DataFrame:
     every saved run, for the deep-dive page's sparkline."""
     rows = []
     for run_date in list_run_dates():
-        run_csv = RUNS_DIR / run_date / "run.csv"
-        run_df = pd.read_csv(run_csv)
+        run_df = pd.read_csv(_run_csv_path(run_date))
         match = run_df[run_df["ticker"] == ticker]
         if match.empty:
             continue

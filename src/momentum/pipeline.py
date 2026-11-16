@@ -27,6 +27,7 @@ from momentum.scoring import classify_dataframe, add_overall_score
 from momentum import catalysts as cat
 from momentum import risk
 from momentum import sector as sec
+from momentum import holdings as hold
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 RUNS_DIR = DATA_DIR / "runs"
@@ -89,13 +90,19 @@ def get_fundamentals(symbols: list[str], force_refresh: bool = False) -> pd.Data
     return pd.DataFrame(rows)
 
 
-def compute_catalyst_and_risk(merged: pd.DataFrame, run_date: str) -> pd.DataFrame:
+def compute_catalyst_and_risk(merged: pd.DataFrame, run_date: str, include_holdings_catalysts: bool = False) -> pd.DataFrame:
     """Adds catalyst_score, risk_score, risk_band (Design Spec) using
     whatever catalysts.json currently holds for this run_date. Safe to call
     again after catalysts.save_catalysts() adds more records - re-running
-    this is much cheaper than re-running the full pipeline."""
+    this is much cheaper than re-running the full pipeline.
+
+    include_holdings_catalysts also merges in catalysts saved under the
+    private holdings runs tree (My-Holdings-only tickers) - pass True only
+    when merged includes the MY_HOLDINGS tier, so those records have a
+    matching row to apply to."""
+    extra_dir = hold.HOLDINGS_RUNS_DIR if include_holdings_catalysts else None
     records_by_ticker: dict[str, list[cat.CatalystRecord]] = {}
-    for record in cat.load_catalyst_records(run_date):
+    for record in cat.load_catalyst_records(run_date, extra_dir=extra_dir):
         records_by_ticker.setdefault(record.ticker, []).append(record)
 
     catalyst_scores, risk_scores, risk_bands, risk_band_labels, triggers = [], [], [], [], []
@@ -130,15 +137,38 @@ def compute_catalyst_and_risk(merged: pd.DataFrame, run_date: str) -> pd.DataFra
     return merged
 
 
+def _save_run(merged: pd.DataFrame, run_date: str, has_holdings: bool) -> None:
+    """Splits merged into the public (safe to commit) and private
+    (holdings-aware) outputs. The public path NEVER includes MY_HOLDINGS-
+    tier rows or the is_held column, regardless of what merged contains -
+    enforced here at the point of writing, not just by convention upstream."""
+    public_df = merged[merged.get("index") != hold.MY_HOLDINGS_INDEX].drop(columns=["is_held"], errors="ignore")
+    out_dir = RUNS_DIR / run_date
+    out_dir.mkdir(parents=True, exist_ok=True)
+    public_df.to_csv(out_dir / "run.csv", index=False)
+    public_df.to_json(out_dir / "run.json", orient="records", indent=2)
+    (RUNS_DIR / "latest.txt").write_text(run_date)
+
+    if has_holdings:
+        private_dir = hold.HOLDINGS_RUNS_DIR / run_date
+        private_dir.mkdir(parents=True, exist_ok=True)
+        merged.to_csv(private_dir / "run.csv", index=False)
+        merged.to_json(private_dir / "run.json", orient="records", indent=2)
+        (hold.HOLDINGS_RUNS_DIR / "latest.txt").write_text(run_date)
+
+
 def rescan_with_catalysts(run_date: str) -> pd.DataFrame:
     """Reload a saved run and recompute catalyst/risk scores - call this
     after catalysts.save_catalysts() so the dashboard reflects what was
-    just researched, without re-running the whole weekly pipeline."""
-    run_path = RUNS_DIR / run_date / "run.csv"
-    merged = pd.read_csv(run_path)
-    merged = compute_catalyst_and_risk(merged, run_date)
-    merged.to_csv(run_path, index=False)
-    merged.to_json(RUNS_DIR / run_date / "run.json", orient="records", indent=2)
+    just researched, without re-running the whole weekly pipeline. Reads
+    from the private holdings-aware file when one exists for this run_date,
+    since it's a strict superset of the public one."""
+    private_path = hold.HOLDINGS_RUNS_DIR / run_date / "run.csv"
+    has_holdings = private_path.exists()
+    source_path = private_path if has_holdings else RUNS_DIR / run_date / "run.csv"
+    merged = pd.read_csv(source_path)
+    merged = compute_catalyst_and_risk(merged, run_date, include_holdings_catalysts=has_holdings)
+    _save_run(merged, run_date, has_holdings=has_holdings)
     return merged
 
 
@@ -209,6 +239,27 @@ def run(quick: int | None = None, force_fundamentals_refresh: bool = False) -> p
     run_date = date.today().isoformat()
 
     universe = fetch_universe()
+
+    # Merge in "My Holdings" (data/holdings/portfolio.tsv) if present: a 4th
+    # tier for tickers not already in the three Nifty index tiers, plus an
+    # is_held flag on every matching row either way. See holdings.py and
+    # _save_run for how this is kept out of the publicly-tracked data/runs/.
+    holdings_data = hold.load_my_holdings()
+    has_holdings = holdings_data is not None
+    if has_holdings:
+        held_tickers = set(holdings_data["equities"]["ticker"])
+        new_tier = holdings_data["equities"][~holdings_data["equities"]["ticker"].isin(universe["ticker"])].copy()
+        new_tier["index"] = hold.MY_HOLDINGS_INDEX
+        universe = pd.concat([universe, new_tier[["symbol", "name", "index", "ticker"]]], ignore_index=True)
+        universe["is_held"] = universe["ticker"].isin(held_tickers)
+        print(
+            f"[pipeline] My Holdings: {len(held_tickers)} tickers held, "
+            f"{len(new_tier)} added as a new tier, {len(holdings_data['funds'])} funds/ETFs "
+            f"and {len(holdings_data['unresolved'])} unresolved excluded from scoring"
+        )
+    else:
+        universe["is_held"] = False
+
     if quick:
         universe = universe.head(quick)
 
@@ -219,8 +270,17 @@ def run(quick: int | None = None, force_fundamentals_refresh: bool = False) -> p
     merged = merged.merge(fundamentals_df, on="symbol", how="left")
 
     merged = classify_dataframe(merged)
-    merged = sec.compute_sector_rotation(merged, prev_sector_rs=_previous_sector_rs(exclude_date=run_date))
-    merged = sec.compute_relative_value(merged)
+
+    # Sector aggregate stats (the per-sector average relative strength, the
+    # PEG percentile cutoffs) are computed ONLY from the public tiers, even
+    # when has_holdings is True - so "My Holdings"-only tickers get a real
+    # classification without being able to nudge anyone else's numbers by
+    # even a fraction of a percentile. See sector.py's reference_df docs.
+    public_reference = merged[merged["index"] != hold.MY_HOLDINGS_INDEX] if has_holdings else None
+    merged = sec.compute_sector_rotation(
+        merged, prev_sector_rs=_previous_sector_rs(exclude_date=run_date), reference_df=public_reference
+    )
+    merged = sec.compute_relative_value(merged, reference_df=public_reference)
 
     prev_result = _previous_run_scores(exclude_date=run_date)
     if prev_result is not None:
@@ -234,13 +294,9 @@ def run(quick: int | None = None, force_fundamentals_refresh: bool = False) -> p
         merged["support_score_delta"] = None
         merged["compared_to_run_date"] = None
 
-    merged = compute_catalyst_and_risk(merged, run_date)
+    merged = compute_catalyst_and_risk(merged, run_date, include_holdings_catalysts=has_holdings)
 
-    out_dir = RUNS_DIR / run_date
-    out_dir.mkdir(parents=True, exist_ok=True)
-    merged.to_csv(out_dir / "run.csv", index=False)
-    merged.to_json(out_dir / "run.json", orient="records", indent=2)
-    (RUNS_DIR / "latest.txt").write_text(run_date)
+    _save_run(merged, run_date, has_holdings=has_holdings)
 
     _market_distribution_day_warning()
 
@@ -248,13 +304,44 @@ def run(quick: int | None = None, force_fundamentals_refresh: bool = False) -> p
     print(f"[pipeline] run {run_date}: {len(merged)} scored, {len(flagged)} flagged into groups")
     print(flagged["group_label"].value_counts().to_string())
 
+    # Catalyst search queries: public-tier flagged stocks go to the public
+    # path as before. My-Holdings-only flagged stocks go to the private
+    # holdings path instead, so their presence never reaches the repo.
+    is_holdings_tier = flagged["index"] == hold.MY_HOLDINGS_INDEX
+    public_flagged = flagged[~is_holdings_tier]
+    out_dir = RUNS_DIR / run_date
     queries_path = out_dir / "catalyst_queries.json"
     queries = {
         row["ticker"]: cat.catalyst_search_queries(row["symbol"], row["name"])
-        for _, row in flagged.iterrows()
+        for _, row in public_flagged.iterrows()
     }
     queries_path.write_text(json.dumps(queries, indent=2))
     print(f"[pipeline] wrote catalyst search queries for {len(queries)} flagged stocks -> {queries_path}")
+
+    if has_holdings:
+        private_dir = hold.HOLDINGS_RUNS_DIR / run_date
+        private_dir.mkdir(parents=True, exist_ok=True)
+
+        holdings_flagged = flagged[is_holdings_tier]
+        if len(holdings_flagged):
+            holdings_queries = {
+                row["ticker"]: cat.catalyst_search_queries(row["symbol"], row["name"])
+                for _, row in holdings_flagged.iterrows()
+            }
+            (private_dir / "catalyst_queries.json").write_text(json.dumps(holdings_queries, indent=2))
+            print(
+                f"[pipeline] wrote catalyst search queries for {len(holdings_queries)} "
+                f"My-Holdings-only flagged stocks -> {private_dir / 'catalyst_queries.json'}"
+            )
+
+        # Transparency note on what's excluded from scoring - names only,
+        # never quantity, cost, or value.
+        excluded = {
+            "funds": holdings_data["funds"][["Stock Symbol", "Company Name"]].to_dict(orient="records"),
+            "unresolved": holdings_data["unresolved"][["Stock Symbol", "Company Name"]].to_dict(orient="records"),
+        }
+        (private_dir / "excluded_holdings.json").write_text(json.dumps(excluded, indent=2))
+
     print("[pipeline] next: ask Claude Code to research catalysts for these and call catalysts.save_catalysts()")
 
     return merged

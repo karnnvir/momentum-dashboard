@@ -127,24 +127,35 @@ def stock_catalyst_score(records: list[CatalystRecord], as_of: date | None = Non
     return max(catalyst_score(r, as_of) for r in positive)
 
 
-def save_catalysts(run_date: str, records: list[CatalystRecord]) -> Path:
-    out_path = DATA_DIR / run_date / "catalysts.json"
+def save_catalysts(run_date: str, records: list[CatalystRecord], base_dir: Path | None = None) -> Path:
+    """base_dir defaults to the public data/runs/ tree. Pass
+    holdings.HOLDINGS_RUNS_DIR when a record's ticker is a My-Holdings-only
+    stock (not otherwise in the Nifty universe), so it never lands in the
+    publicly-tracked path."""
+    out_path = (base_dir or DATA_DIR) / run_date / "catalysts.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    existing = load_catalysts(run_date)
+    existing = load_catalysts(run_date, base_dir=base_dir)
     merged = existing + [asdict(r) for r in records]
     out_path.write_text(json.dumps(merged, indent=2))
     return out_path
 
 
-def load_catalysts(run_date: str) -> list[dict]:
-    path = DATA_DIR / run_date / "catalysts.json"
+def load_catalysts(run_date: str, base_dir: Path | None = None) -> list[dict]:
+    path = (base_dir or DATA_DIR) / run_date / "catalysts.json"
     if not path.exists():
         return []
     return json.loads(path.read_text())
 
 
-def load_catalyst_records(run_date: str) -> list[CatalystRecord]:
-    return [CatalystRecord(**d) for d in load_catalysts(run_date)]
+def load_catalyst_records(run_date: str, extra_dir: Path | None = None) -> list[CatalystRecord]:
+    """Loads the public catalysts.json, and when extra_dir is given (the
+    private holdings runs tree), also merges in any catalysts saved there
+    for My-Holdings-only tickers. Safe to call even when extra_dir doesn't
+    exist yet."""
+    records = [CatalystRecord(**d) for d in load_catalysts(run_date)]
+    if extra_dir is not None:
+        records += [CatalystRecord(**d) for d in load_catalysts(run_date, base_dir=extra_dir)]
+    return records
 
 
 if __name__ == "__main__":

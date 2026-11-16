@@ -19,7 +19,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from momentum.scoring import GROUP_LABELS, EARLY_SIGNS, SUPPORTED_TREND, HYPE_RISK, NOT_MOVING_YET  # noqa: E402
 from momentum.universe import INDEX_DISPLAY_NAMES  # noqa: E402
 from momentum.risk import RISK_BAND_LABELS  # noqa: E402
-from data_loader import load_latest_run, catalysts_by_ticker as _catalysts_by_ticker  # noqa: E402
+from data_loader import (  # noqa: E402
+    load_latest_run,
+    catalysts_by_ticker as _catalysts_by_ticker,
+    load_excluded_holdings,
+)
 
 st.set_page_config(page_title="Momentum Dashboard", layout="wide")
 
@@ -91,6 +95,26 @@ with filter_col5:
 if has_sector_data and selected_sector != "All":
     df = df[df["sector"] == selected_sector]
 
+holdings_only = st.checkbox("📌 My Holdings only", value=False)
+if holdings_only:
+    df = df[df["is_held"]]
+
+excluded = load_excluded_holdings(run_date)
+if excluded and (excluded.get("funds") or excluded.get("unresolved")):
+    with st.expander(
+        f"ℹ️ {len(excluded.get('funds', []))} fund/ETF holdings and "
+        f"{len(excluded.get('unresolved', []))} unresolved holdings aren't scored"
+    ):
+        if excluded.get("funds"):
+            st.caption(
+                "Funds/ETFs - no Support/Catalyst score, since those formulas assume a "
+                "company with quarterly results and promoter holding, which a fund doesn't have:"
+            )
+            st.dataframe(pd.DataFrame(excluded["funds"]), hide_index=True, use_container_width=True)
+        if excluded.get("unresolved"):
+            st.caption("Not found on NSE's listed-equity master list (e.g. genuinely unlisted):")
+            st.dataframe(pd.DataFrame(excluded["unresolved"]), hide_index=True, use_container_width=True)
+
 catalysts_by_ticker = _catalysts_by_ticker(catalyst_records)
 
 # --- Summary row ---
@@ -105,12 +129,15 @@ st.divider()
 # --- Sortable table of all stocks ---
 st.subheader("All stocks")
 table_cols = [
-    "ticker", "index", "sector", "overall_score", "momentum_score", "support_score", "catalyst_score",
-    "risk_score", "risk_band_label", "group_label", "sector_state_label", "relative_value_label",
-    "ret_1m", "ret_3m", "early_turn_flag",
+    "is_held", "ticker", "index", "sector", "overall_score", "momentum_score", "support_score",
+    "catalyst_score", "risk_score", "risk_band_label", "group_label", "sector_state_label",
+    "relative_value_label", "ret_1m", "ret_3m", "early_turn_flag",
     "momentum_score_delta", "support_score_delta",
 ]
 display_df = df[[c for c in table_cols if c in df.columns]].copy()
+if "is_held" in display_df.columns:
+    display_df = display_df.rename(columns={"is_held": "held"})
+    display_df["held"] = display_df["held"].map({True: "📌", False: ""})
 if "index" in display_df.columns:
     display_df["index"] = display_df["index"].map(lambda i: INDEX_DISPLAY_NAMES.get(i, i))
 for pct_col in ("ret_1m", "ret_3m"):
@@ -157,8 +184,9 @@ for _, row in flagged.iterrows():
     with st.container(border=True):
         header_col, button_col = st.columns([5, 1])
         with header_col:
+            held_badge = "📌 " if row.get("is_held") else ""
             st.markdown(
-                f"### {row['group_label']}  —  {row['name']} ({row['ticker']})  "
+                f"### {held_badge}{row['group_label']}  —  {row['name']} ({row['ticker']})  "
                 f"&nbsp; {row.get('risk_score', '')} {row.get('risk_band_label', '')}"
             )
             sector_bits = [b for b in [row.get("sector"), row.get("sector_state_label"), row.get("relative_value_label")] if b and pd.notna(b)]

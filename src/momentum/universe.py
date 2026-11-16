@@ -73,6 +73,7 @@ INDEX_DISPLAY_NAMES = {
     "NIFTY_50": "Nifty 50",
     "NIFTY_NEXT_50": "Nifty Next 50",
     "NIFTY_MIDCAP_150": "Nifty Midcap 150",
+    "MY_HOLDINGS": "📌 My Holdings",
 }
 
 

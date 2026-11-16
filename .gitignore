@@ -8,3 +8,6 @@ data/fundamentals_cache.json
 *.egg-info/
 .claude/
 logs/
+
+# Personal portfolio data (holdings, quantities, cost basis) - never public.
+data/holdings/

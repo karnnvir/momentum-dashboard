@@ -42,7 +42,7 @@ by_ticker = catalysts_by_ticker(catalyst_records)
 
 # --- Stock selector ---
 df_sorted = df.sort_values("name")
-labels = [f"{r['name']} ({r['ticker']})" for _, r in df_sorted.iterrows()]
+labels = [f"{'📌 ' if r.get('is_held') else ''}{r['name']} ({r['ticker']})" for _, r in df_sorted.iterrows()]
 label_to_ticker = {label: r["ticker"] for label, (_, r) in zip(labels, df_sorted.iterrows())}
 ticker_to_label = {v: k for k, v in label_to_ticker.items()}
 
@@ -57,7 +57,8 @@ st.session_state["selected_ticker"] = ticker
 row = df[df["ticker"] == ticker].iloc[0]
 
 # --- Header ---
-st.title(f"{row['name']} ({row['ticker']})")
+held_badge = "📌 " if row.get("is_held") else ""
+st.title(f"{held_badge}{row['name']} ({row['ticker']})")
 header_bits = [
     INDEX_DISPLAY_NAMES.get(row.get("index"), row.get("index")),
     row.get("sector") if pd.notna(row.get("sector")) else None,

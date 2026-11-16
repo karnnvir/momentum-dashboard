@@ -76,7 +76,9 @@ def _sector_counts(df: pd.DataFrame) -> pd.Series:
     return df.groupby("sector")["rs_vs_nifty_3m"].count()
 
 
-def compute_sector_rotation(df: pd.DataFrame, prev_sector_rs: dict[str, float] | None = None) -> pd.DataFrame:
+def compute_sector_rotation(
+    df: pd.DataFrame, prev_sector_rs: dict[str, float] | None = None, reference_df: pd.DataFrame | None = None
+) -> pd.DataFrame:
     """Adds sector_rs_percentile, sector_state, sector_state_label.
 
     Classification is the standard 2x2 rotation-quadrant read on (level,
@@ -85,10 +87,19 @@ def compute_sector_rotation(df: pd.DataFrame, prev_sector_rs: dict[str, float] |
     previous run for a sector yet, trend is unknown and the state is set
     from level alone (Leading if strong, Lagging if not) rather than
     guessing a direction.
+
+    reference_df (defaults to df itself): the aggregate per-sector stats
+    (mean relative strength, percentile rank) are computed ONLY from this
+    set, while every row in df still gets a classification by looking its
+    own sector up in those stats. Pass the public-only subset here when df
+    also contains a privacy-sensitive extra tier (e.g. "My Holdings") -
+    that tier then gets a real classification without being able to nudge
+    anyone else's numbers, even by a fraction of a percentile.
     """
     df = df.copy()
-    counts = _sector_counts(df)
-    sector_rs = df.groupby("sector")["rs_vs_nifty_3m"].mean()
+    reference_df = df if reference_df is None else reference_df
+    counts = _sector_counts(reference_df)
+    sector_rs = reference_df.groupby("sector")["rs_vs_nifty_3m"].mean()
     sector_rs_percentile = sector_rs.rank(pct=True) * 100
 
     def state_for(sector: str | None) -> str | None:
@@ -146,19 +157,33 @@ def _peg(pe_ratio: float | None, recent_profit_growth_pct: float | None) -> floa
     return round(pe_ratio / recent_profit_growth_pct, 2)
 
 
-def compute_relative_value(df: pd.DataFrame) -> pd.DataFrame:
-    """Adds peg_ratio, relative_value_flag, relative_value_label."""
+def compute_relative_value(df: pd.DataFrame, reference_df: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Adds peg_ratio, relative_value_flag, relative_value_label.
+
+    reference_df: the per-sector PEG percentile cutoffs are computed ONLY
+    from this set (defaults to df itself) - same privacy-isolation purpose
+    as compute_sector_rotation's reference_df. A row outside reference_df
+    still gets flagged by comparing its own PEG against those cutoffs."""
     df = df.copy()
     df["peg_ratio"] = df.apply(
         lambda r: _peg(r.get("pe_ratio"), r.get("recent_profit_growth_pct")), axis=1
     )
+
+    if reference_df is None:
+        reference_peg = df[["sector", "peg_ratio"]]
+    else:
+        reference_peg = reference_df.copy()
+        reference_peg["peg_ratio"] = reference_peg.apply(
+            lambda r: _peg(r.get("pe_ratio"), r.get("recent_profit_growth_pct")), axis=1
+        )
+        reference_peg = reference_peg[["sector", "peg_ratio"]]
 
     def flag_for(row: pd.Series) -> str | None:
         sector = row.get("sector")
         own_peg = row.get("peg_ratio")
         if sector is None or pd.isna(sector) or own_peg is None or pd.isna(own_peg):
             return None
-        peers = df.loc[(df["sector"] == sector) & df["peg_ratio"].notna(), "peg_ratio"]
+        peers = reference_peg.loc[(reference_peg["sector"] == sector) & reference_peg["peg_ratio"].notna(), "peg_ratio"]
         if len(peers) < MIN_SECTOR_SIZE:
             return None
         discount_cutoff = peers.quantile(REL_VALUE_DISCOUNT_PERCENTILE / 100)
