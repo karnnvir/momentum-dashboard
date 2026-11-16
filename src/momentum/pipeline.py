@@ -23,9 +23,10 @@ import yfinance as yf
 from momentum.universe import fetch_universe
 from momentum.price_momentum import score_universe, NIFTY50_TICKER, LOOKBACK_DAYS
 from momentum.fundamentals import fetch_fundamentals_for_universe, StockFundamentals
-from momentum.scoring import classify_dataframe
+from momentum.scoring import classify_dataframe, add_overall_score
 from momentum import catalysts as cat
 from momentum import risk
+from momentum import sector as sec
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 RUNS_DIR = DATA_DIR / "runs"
@@ -80,6 +81,9 @@ def get_fundamentals(symbols: list[str], force_refresh: bool = False) -> pd.Data
                 "promoter_pledge": entry.get("promoter_pledge"),
                 "debt_to_equity": entry.get("debt_to_equity"),
                 "earnings_quality_discounted": entry.get("earnings_quality_discounted", False),
+                "sector": entry.get("sector"),
+                "pe_ratio": entry.get("pe_ratio"),
+                "recent_profit_growth_pct": entry.get("recent_profit_growth_pct"),
             }
         )
     return pd.DataFrame(rows)
@@ -97,7 +101,8 @@ def compute_catalyst_and_risk(merged: pd.DataFrame, run_date: str) -> pd.DataFra
     catalyst_scores, risk_scores, risk_bands, risk_band_labels, triggers = [], [], [], [], []
     for _, row in merged.iterrows():
         records = records_by_ticker.get(row["ticker"], [])
-        cscore = cat.stock_catalyst_score(records)
+        sector_modifier = sec.CATALYST_SECTOR_MODIFIERS.get(row.get("sector_state"), 1.0)
+        cscore = round(cat.stock_catalyst_score(records) * sector_modifier)
         has_negative = any(r.direction == "negative" for r in records)
         assessment = risk.assess_risk(
             ticker=row["ticker"],
@@ -121,6 +126,7 @@ def compute_catalyst_and_risk(merged: pd.DataFrame, run_date: str) -> pd.DataFra
     merged["risk_band"] = risk_bands
     merged["risk_band_label"] = risk_band_labels
     merged["risk_active_triggers"] = triggers
+    merged = add_overall_score(merged)
     return merged
 
 
@@ -151,19 +157,57 @@ def _market_distribution_day_warning() -> None:
         print(f"[pipeline] Nifty 50 distribution days (last ~4 weeks): {count} - no book-wide warning")
 
 
-def _previous_run_scores() -> pd.DataFrame | None:
+def _previous_run_scores(exclude_date: str) -> tuple[str, pd.DataFrame] | None:
+    """The most recent saved run strictly BEFORE exclude_date (today's run
+    date), plus which date it came from. Excluding today's own date matters
+    because this project has sometimes run the pipeline more than once in a
+    day (testing, backfills) - without this, a same-day re-run would diff
+    against itself from a few hours ago and silently call it a "weekly"
+    delta. The caller is expected to show the returned date alongside any
+    delta, rather than implying it's always exactly a week old."""
     if not RUNS_DIR.exists():
         return None
-    run_dates = sorted((p.name for p in RUNS_DIR.iterdir() if p.is_dir()), reverse=True)
+    run_dates = sorted(
+        (p.name for p in RUNS_DIR.iterdir() if p.is_dir() and p.name != exclude_date), reverse=True
+    )
     for run_date in run_dates:
         f = RUNS_DIR / run_date / "run.csv"
         if f.exists():
             df = pd.read_csv(f)
-            return df[["ticker", "momentum_score", "support_score"]]
+            return run_date, df[["ticker", "momentum_score", "support_score"]]
+    return None
+
+
+def _previous_sector_rs(exclude_date: str) -> dict[str, float] | None:
+    """Last run's sector_rs_percentile per sector, for Sector Rotation
+    State's trend component. None (not an empty dict) when no prior run has
+    this column yet, so compute_sector_rotation knows to skip trend rather
+    than treat "no data" as "falling." Excludes exclude_date (today's run
+    date) for the same same-day-rerun reason as _previous_run_scores."""
+    if not RUNS_DIR.exists():
+        return None
+    run_dates = sorted(
+        (p.name for p in RUNS_DIR.iterdir() if p.is_dir() and p.name != exclude_date), reverse=True
+    )
+    for run_date in run_dates:
+        f = RUNS_DIR / run_date / "run.csv"
+        if not f.exists():
+            continue
+        df = pd.read_csv(f)
+        if "sector_rs_percentile" not in df.columns:
+            return None
+        return (
+            df.dropna(subset=["sector", "sector_rs_percentile"])
+            .drop_duplicates(subset="sector")
+            .set_index("sector")["sector_rs_percentile"]
+            .to_dict()
+        )
     return None
 
 
 def run(quick: int | None = None, force_fundamentals_refresh: bool = False) -> pd.DataFrame:
+    run_date = date.today().isoformat()
+
     universe = fetch_universe()
     if quick:
         universe = universe.head(quick)
@@ -175,17 +219,21 @@ def run(quick: int | None = None, force_fundamentals_refresh: bool = False) -> p
     merged = merged.merge(fundamentals_df, on="symbol", how="left")
 
     merged = classify_dataframe(merged)
+    merged = sec.compute_sector_rotation(merged, prev_sector_rs=_previous_sector_rs(exclude_date=run_date))
+    merged = sec.compute_relative_value(merged)
 
-    prev = _previous_run_scores()
-    if prev is not None:
+    prev_result = _previous_run_scores(exclude_date=run_date)
+    if prev_result is not None:
+        prev_run_date, prev = prev_result
         merged = merged.merge(prev, on="ticker", how="left", suffixes=("", "_prev"))
         merged["momentum_score_delta"] = (merged["momentum_score"] - merged["momentum_score_prev"]).round(1)
         merged["support_score_delta"] = (merged["support_score"] - merged["support_score_prev"]).round(1)
+        merged["compared_to_run_date"] = prev_run_date
     else:
         merged["momentum_score_delta"] = None
         merged["support_score_delta"] = None
+        merged["compared_to_run_date"] = None
 
-    run_date = date.today().isoformat()
     merged = compute_catalyst_and_risk(merged, run_date)
 
     out_dir = RUNS_DIR / run_date

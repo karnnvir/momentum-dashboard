@@ -50,6 +50,13 @@ class StockFundamentals:
     annual_cash_from_operations: list = field(default_factory=list)
     support_score: float | None = None
     earnings_quality_discounted: bool = False
+    # Design Spec v2 (Phase 2, sector/relative-value): "Broad Sector" from
+    # screener.in's peer-comparison breadcrumb - coarse enough that each
+    # sector has multiple universe stocks to average, unlike the finer
+    # "Industry" tag.
+    sector: str | None = None
+    pe_ratio: float | None = None
+    recent_profit_growth_pct: float | None = None  # set by score_fundamentals; feeds PEG
     error: str | None = None
 
 
@@ -129,6 +136,10 @@ def fetch_fundamentals(symbol: str) -> StockFundamentals:
         sf.promoter_pledge = _parse_ratio(soup, "Pledged percentage")
         sf.fii_holding = _parse_ratio(soup, "FII holding")
         sf.dii_holding = _parse_ratio(soup, "DII holding")
+        sf.pe_ratio = _parse_ratio(soup, "Stock P/E")
+
+        sector_link = soup.select_one('a[title="Broad Sector"]')
+        sf.sector = sector_link.get_text(strip=True) if sector_link else None
 
         sf.quarterly_sales = _parse_quarterly_series(soup, "Sales")
         sf.quarterly_profit = _parse_quarterly_series(soup, "Net Profit")
@@ -181,6 +192,7 @@ def score_fundamentals(sf: StockFundamentals) -> float | None:
     profit_growth = _yoy_growth(sf.quarterly_profit)
     if profit_growth and profit_growth[-1] is not None:
         recent_growth = profit_growth[-1]
+        sf.recent_profit_growth_pct = round(recent_growth * 100, 1)
         points.append(min(max(recent_growth, -1), 1) * 50 + 50)
         if len(profit_growth) >= 2 and profit_growth[-2] is not None:
             accelerating = profit_growth[-1] > profit_growth[-2]

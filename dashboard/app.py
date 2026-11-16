@@ -6,7 +6,6 @@ Run with:
 
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 
@@ -15,29 +14,14 @@ import streamlit as st
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from momentum.scoring import GROUP_LABELS, EARLY_SIGNS, SUPPORTED_TREND, HYPE_RISK, NOT_MOVING_YET  # noqa: E402
 from momentum.universe import INDEX_DISPLAY_NAMES  # noqa: E402
-
-DATA_DIR = ROOT / "data"
-RUNS_DIR = DATA_DIR / "runs"
+from momentum.risk import RISK_BAND_LABELS  # noqa: E402
+from data_loader import load_latest_run, catalysts_by_ticker as _catalysts_by_ticker  # noqa: E402
 
 st.set_page_config(page_title="Momentum Dashboard", layout="wide")
-
-
-def load_latest_run() -> tuple[str, pd.DataFrame, list[dict]] | None:
-    latest_file = RUNS_DIR / "latest.txt"
-    if not latest_file.exists():
-        return None
-    run_date = latest_file.read_text().strip()
-    run_path = RUNS_DIR / run_date / "run.json"
-    if not run_path.exists():
-        return None
-    df = pd.DataFrame(json.loads(run_path.read_text()))
-    catalysts_path = RUNS_DIR / run_date / "catalysts.json"
-    catalysts = json.loads(catalysts_path.read_text()) if catalysts_path.exists() else []
-    return run_date, df, catalysts
-
 
 result = load_latest_run()
 
@@ -57,17 +41,57 @@ if result is None:
     st.stop()
 
 run_date, df, catalyst_records = result
-st.caption(f"Last run: {run_date}")
+if "compared_to_run_date" in df.columns:
+    compared_to_values = df["compared_to_run_date"].dropna().unique()
+    compared_to_run_date = compared_to_values[0] if len(compared_to_values) else None
+else:
+    compared_to_run_date = None
+if compared_to_run_date:
+    st.caption(f"Last run: {run_date}. Deltas are vs the {compared_to_run_date} run.")
+else:
+    st.caption(f"Last run: {run_date}. No prior run yet to compare deltas against.")
 
-universe_options = ["All"] + [INDEX_DISPLAY_NAMES.get(i, i) for i in sorted(df["index"].dropna().unique())]
-selected_universe = st.selectbox("Universe", universe_options)
+filter_col1, filter_col2, filter_col3, filter_col4, filter_col5 = st.columns([2, 1, 1, 1, 1])
+
+with filter_col1:
+    search_query = st.text_input("Search ticker or name", placeholder="e.g. TCS or Divi's")
+if search_query.strip():
+    q = search_query.strip().lower()
+    df = df[df["ticker"].str.lower().str.contains(q) | df["name"].str.lower().str.contains(q)]
+
+with filter_col2:
+    universe_options = ["All"] + [INDEX_DISPLAY_NAMES.get(i, i) for i in sorted(df["index"].dropna().unique())]
+    selected_universe = st.selectbox("Universe", universe_options)
 if selected_universe != "All":
     index_key = next(k for k, v in INDEX_DISPLAY_NAMES.items() if v == selected_universe)
     df = df[df["index"] == index_key]
 
-catalysts_by_ticker: dict[str, list[dict]] = {}
-for rec in catalyst_records:
-    catalysts_by_ticker.setdefault(rec["ticker"], []).append(rec)
+with filter_col3:
+    risk_band_options = ["All"] + [RISK_BAND_LABELS.get(b, b) for b in sorted(df["risk_band"].dropna().unique())]
+    selected_risk_band = st.selectbox("Risk Band", risk_band_options)
+if selected_risk_band != "All":
+    risk_band_key = next(k for k, v in RISK_BAND_LABELS.items() if v == selected_risk_band)
+    df = df[df["risk_band"] == risk_band_key]
+
+with filter_col4:
+    group_options = ["All"] + [GROUP_LABELS.get(g, g) for g in sorted(df["group"].dropna().unique())]
+    selected_group = st.selectbox("Group", group_options)
+if selected_group != "All":
+    group_key = next(k for k, v in GROUP_LABELS.items() if v == selected_group)
+    df = df[df["group"] == group_key]
+
+has_sector_data = "sector" in df.columns
+with filter_col5:
+    if has_sector_data:
+        sector_options = ["All"] + sorted(df["sector"].dropna().unique())
+        selected_sector = st.selectbox("Sector", sector_options)
+    else:
+        st.selectbox("Sector", ["Not available yet"], disabled=True)
+        selected_sector = "All"
+if has_sector_data and selected_sector != "All":
+    df = df[df["sector"] == selected_sector]
+
+catalysts_by_ticker = _catalysts_by_ticker(catalyst_records)
 
 # --- Summary row ---
 group_order = [EARLY_SIGNS, SUPPORTED_TREND, HYPE_RISK, NOT_MOVING_YET]
@@ -81,8 +105,8 @@ st.divider()
 # --- Sortable table of all stocks ---
 st.subheader("All stocks")
 table_cols = [
-    "ticker", "index", "momentum_score", "support_score", "catalyst_score",
-    "risk_band_label", "group_label",
+    "ticker", "index", "sector", "overall_score", "momentum_score", "support_score", "catalyst_score",
+    "risk_score", "risk_band_label", "group_label", "sector_state_label", "relative_value_label",
     "ret_1m", "ret_3m", "early_turn_flag",
     "momentum_score_delta", "support_score_delta",
 ]
@@ -92,32 +116,71 @@ if "index" in display_df.columns:
 for pct_col in ("ret_1m", "ret_3m"):
     if pct_col in display_df.columns:
         display_df[pct_col] = (display_df[pct_col] * 100).round(1)
-display_df = display_df.sort_values("momentum_score", ascending=False)
-st.dataframe(display_df, use_container_width=True, hide_index=True)
+display_df = display_df.sort_values("overall_score", ascending=False).reset_index(drop=True)
+st.caption(
+    "Sorted by **Overall Score** = 50% Momentum + 35% Support + 15% Catalyst — "
+    "see Methodology for why catalyst only adds, never subtracts. "
+    "Click a row to open its deep-dive page."
+)
+if "table_nav_count" not in st.session_state:
+    st.session_state["table_nav_count"] = 0
+
+table_event = st.dataframe(
+    display_df,
+    use_container_width=True,
+    hide_index=True,
+    on_select="rerun",
+    selection_mode="single-row",
+    # Keyed with a counter that bumps on every navigation, so the widget is
+    # reset (no stale selection) when the user comes back from the deep-dive
+    # page - otherwise returning here would immediately re-trigger the old
+    # selection and bounce straight back.
+    key=f"all_stocks_table_{st.session_state['table_nav_count']}",
+)
+selected_rows = table_event.selection.rows if table_event and table_event.selection else []
+if selected_rows:
+    selected_ticker = display_df.iloc[selected_rows[0]]["ticker"]
+    st.session_state["selected_ticker"] = selected_ticker
+    st.session_state["table_nav_count"] += 1
+    st.switch_page("pages/2_Stock_Deep_Dive.py")
 
 st.divider()
 
 # --- Cards for flagged stocks ---
 st.subheader("Flagged stocks")
-flagged = df[df["group"].notna()].sort_values("momentum_score", ascending=False)
+flagged = df[df["group"].notna()].sort_values("overall_score", ascending=False)
 
 if flagged.empty:
     st.info("No stocks fell into a group this run.")
 
 for _, row in flagged.iterrows():
     with st.container(border=True):
-        st.markdown(
-            f"### {row['group_label']}  —  {row['name']} ({row['ticker']})  "
-            f"&nbsp; {row.get('risk_band_label', '')}"
-        )
+        header_col, button_col = st.columns([5, 1])
+        with header_col:
+            st.markdown(
+                f"### {row['group_label']}  —  {row['name']} ({row['ticker']})  "
+                f"&nbsp; {row.get('risk_score', '')} {row.get('risk_band_label', '')}"
+            )
+            sector_bits = [b for b in [row.get("sector"), row.get("sector_state_label"), row.get("relative_value_label")] if b and pd.notna(b)]
+            if sector_bits:
+                st.caption(" · ".join(sector_bits))
+        with button_col:
+            if st.button("🔍 Deep dive", key=f"dive_{row['ticker']}"):
+                st.session_state["selected_ticker"] = row["ticker"]
+                st.switch_page("pages/2_Stock_Deep_Dive.py")
         momentum_delta = row.get("momentum_score_delta")
         support_delta = row.get("support_score_delta")
-        c1, c2, c3, c4, c5 = st.columns(5)
-        c1.metric("Momentum", row.get("momentum_score"), momentum_delta if pd.notna(momentum_delta) else None)
-        c2.metric("Support", row.get("support_score"), support_delta if pd.notna(support_delta) else None)
-        c3.metric("Catalyst", row.get("catalyst_score", 0))
-        c4.metric("1M return", f"{row.get('ret_1m', 0) * 100:.1f}%" if pd.notna(row.get("ret_1m")) else "—")
-        c5.metric("3M return", f"{row.get('ret_3m', 0) * 100:.1f}%" if pd.notna(row.get("ret_3m")) else "—")
+        c1, c2, c3, c4, c5, c6 = st.columns(6)
+        c1.metric("Overall", row.get("overall_score"))
+        c2.metric("Momentum", row.get("momentum_score"), momentum_delta if pd.notna(momentum_delta) else None)
+        c3.metric("Support", row.get("support_score"), support_delta if pd.notna(support_delta) else None)
+        c4.metric("Catalyst", row.get("catalyst_score", 0))
+        c5.metric("1M return", f"{row.get('ret_1m', 0) * 100:.1f}%" if pd.notna(row.get("ret_1m")) else "—")
+        c6.metric("3M return", f"{row.get('ret_3m', 0) * 100:.1f}%" if pd.notna(row.get("ret_3m")) else "—")
+
+        compared_to = row.get("compared_to_run_date")
+        if (pd.notna(momentum_delta) or pd.notna(support_delta)) and pd.notna(compared_to):
+            st.caption(f"Momentum/Support deltas are vs the {compared_to} run.")
 
         if row.get("risk_active_triggers"):
             st.caption(f"Risk triggers active: {row['risk_active_triggers']}")
