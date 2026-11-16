@@ -1,6 +1,5 @@
 # Momentum Dashboard — build spec (handoff to Claude Code)
 
-Decided in chat on 15 Nov 2026. This doc is the brief for building it in Claude Code. It extends the older `momentum-watch-daily-gainers.md`, which only looked at the top 3 daily gainers, into a scored tracker for the whole universe.
 
 ## Goal
 
@@ -8,7 +7,7 @@ Each week, score a fixed universe of Indian stocks for momentum size and for how
 
 ## Decisions
 
-* Universe: Nifty Next 50 + Nifty Midcap 150, about 200 stocks. The two indices don't overlap: Next 50 is ranks 51–100, Midcap 150 is ranks 101–250. Pull the constituent lists from niftyindices.com so rebalances are picked up automatically.
+* Universe: Nifty + Nifty Next 50 + Nifty Midcap 150, about 200 stocks. Pull the constituent lists from niftyindices.com so rebalances are picked up automatically.
 * Price data: Yahoo Finance (`yfinance`, tickers with the `.NS` suffix). Fundamentals: screener.in.
 * Cadence: a weekly deep run, Saturday morning IST, after the week's close.
 * Output: a dashboard that sorts every stock into one of four groups, with both scores shown and the catalysts listed.
