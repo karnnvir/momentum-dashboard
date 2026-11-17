@@ -19,7 +19,15 @@ from dataclasses import dataclass, field
 import requests
 from bs4 import BeautifulSoup
 
-SCREENER_URL = "https://www.screener.in/company/{symbol}/"
+# Consolidated, not standalone: for a company with subsidiaries, the
+# standalone (parent-only) page can show a wildly different - even opposite
+# - picture from the consolidated results that the market and analysts
+# actually react to (checked 2026-11-17: Kaynes' Sep-2026 standalone net
+# profit was +288% YoY at Rs 97cr, while consolidated was -65% YoY at Rs
+# 40cr, matching reported news). screener.in serves identical figures under
+# /consolidated/ for companies with no separate consolidated filing, so this
+# is safe as the single default URL - no per-company branching needed.
+SCREENER_URL = "https://www.screener.in/company/{symbol}/consolidated/"
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
