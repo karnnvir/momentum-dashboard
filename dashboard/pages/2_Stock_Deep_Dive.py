@@ -18,9 +18,15 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from momentum.scoring import GROUP_LABELS, OVERALL_SCORE_WEIGHTS  # noqa: E402
+from momentum.scoring import GROUP_LABELS, OVERALL_SCORE_WEIGHTS, NOT_MOVING_YET  # noqa: E402
 from momentum.universe import INDEX_DISPLAY_NAMES  # noqa: E402
-from momentum.risk import TRIGGER_POINTS  # noqa: E402
+from momentum.risk import (  # noqa: E402
+    TRIGGER_POINTS,
+    EXTENSION_EXHAUSTION_THRESHOLD,
+    CLIMAX_RETURN_THRESHOLD,
+    PLEDGE_DANGER_PCT,
+    DEBT_TO_EQUITY_DANGER,
+)
 from momentum.catalysts import (  # noqa: E402
     TYPE_WEIGHTS,
     CONFIRMATION_MULTIPLIERS,
@@ -474,6 +480,65 @@ st.divider()
 st.subheader("Risk Score trigger checklist")
 raw_triggers = row.get("risk_active_triggers")
 active_triggers = set(raw_triggers.split(",")) if isinstance(raw_triggers, str) and raw_triggers else set()
+negative_catalysts = [c for c in by_ticker.get(ticker, []) if c.get("direction") == "negative"]
+
+
+def _trigger_why(name: str, is_active: bool) -> str:
+    """Plugs this stock's own numbers into the trigger condition that
+    either fired or didn't - same thresholds as risk.py, just explained."""
+    if name == "time_decay":
+        group = row.get("group")
+        if pd.isna(group) or group is None or group == NOT_MOVING_YET:
+            return "Not applicable - this stock isn't in a momentum-flagged group."
+        cscore = row.get("catalyst_score", 0)
+        if is_active:
+            return f"Catalyst Score = {cscore} - no live catalyst to justify the move while flagged."
+        return f"Catalyst Score = {cscore} > 0 - a live catalyst backs the move."
+
+    if name == "technical_exhaustion":
+        ext = row.get("extension_pct")
+        ret_1m = row.get("ret_1m")
+        if is_active:
+            reasons = []
+            if pd.notna(ext) and ext > EXTENSION_EXHAUSTION_THRESHOLD:
+                reasons.append(f"Extension {ext:.1%} above 50-DMA (> {EXTENSION_EXHAUSTION_THRESHOLD:.0%} threshold)")
+            if pd.notna(ret_1m) and ret_1m > CLIMAX_RETURN_THRESHOLD:
+                reasons.append(f"1-month return {ret_1m:.1%} (> {CLIMAX_RETURN_THRESHOLD:.0%} - climax-style run)")
+            return "; ".join(reasons) if reasons else "Active."
+        ext_display = f"{ext:.1%}" if pd.notna(ext) else "—"
+        ret_display = f"{ret_1m:.1%}" if pd.notna(ret_1m) else "—"
+        return f"Extension {ext_display} and 1-month return {ret_display}, both below their thresholds."
+
+    if name == "valuation_extremes":
+        return "Not implemented - no PEG/valuation data source wired up yet; always inactive rather than fabricated."
+
+    if name == "fundamental_deterioration":
+        pledge = row.get("promoter_pledge")
+        de = row.get("debt_to_equity")
+        discounted = bool(row.get("earnings_quality_discounted"))
+        if is_active:
+            reasons = []
+            if pd.notna(pledge) and pledge > PLEDGE_DANGER_PCT:
+                reasons.append(f"Promoter pledge {pledge:.1f}% (> {PLEDGE_DANGER_PCT:.0f}% threshold)")
+            if pd.notna(de) and de > DEBT_TO_EQUITY_DANGER:
+                reasons.append(f"Debt/Equity {de:.2f} (> {DEBT_TO_EQUITY_DANGER:.1f} threshold)")
+            if discounted:
+                reasons.append("Earnings-quality discount fired (CFO/Net Profit < 0.8 for 2+ years)")
+            return "; ".join(reasons) if reasons else "Active."
+        pledge_display = f"{pledge:.1f}%" if pd.notna(pledge) else "—"
+        de_display = f"{de:.2f}" if pd.notna(de) else "—"
+        return f"Pledge {pledge_display}, Debt/Equity {de_display}, no earnings-quality discount - all within bounds."
+
+    if name == "news_trigger":
+        if is_active and negative_catalysts:
+            headlines = "; ".join(c["headline"] for c in negative_catalysts)
+            return f"Negative catalyst on record: {headlines}"
+        if is_active:
+            return "Active."
+        return "No negative catalyst on record this run."
+
+    return ""
+
 
 checklist_df = pd.DataFrame(
     [
@@ -481,6 +546,7 @@ checklist_df = pd.DataFrame(
             "Trigger": name.replace("_", " ").title(),
             "Active": "✅" if name in active_triggers else "—",
             "Points": points if name in active_triggers else 0,
+            "Why": _trigger_why(name, name in active_triggers),
         }
         for name, points in TRIGGER_POINTS.items()
     ]
