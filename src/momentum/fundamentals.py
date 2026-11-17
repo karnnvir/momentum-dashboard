@@ -91,7 +91,10 @@ def _parse_quarterly_series(soup: BeautifulSoup, row_label: str) -> list[float]:
         return []
     values = []
     for cell in row.find_all("td")[1:]:
-        text = cell.get_text(strip=True).replace(",", "")
+        # Strip "%" too - a row like "OPM %" has cells like "28%", and
+        # float("28%") raises ValueError, which the bare except below
+        # swallowed silently, discarding every value rather than erroring.
+        text = cell.get_text(strip=True).replace(",", "").replace("%", "")
         try:
             values.append(float(text))
         except ValueError:
@@ -115,12 +118,57 @@ def _parse_annual_series(soup: BeautifulSoup, section_id: str, row_label: str) -
         return []
     values = []
     for cell in row.find_all("td")[1:]:
-        text = cell.get_text(strip=True).replace(",", "")
+        text = cell.get_text(strip=True).replace(",", "").replace("%", "")
         try:
             values.append(float(text))
         except ValueError:
             continue
     return values
+
+
+def _parse_shareholding_latest(soup: BeautifulSoup, row_label: str) -> float | None:
+    """Latest-quarter value for a shareholding-pattern row (Promoters,
+    FIIs, DIIs). These live in the #shareholding section's own table, NOT
+    the top ratios widget - screener.in's current page layout doesn't
+    expose "Promoter holding"/"FII holding"/"DII holding" as ratios at
+    all, which is why they came back empty before this fix."""
+    section = soup.find("section", id="shareholding")
+    if section is None:
+        return None
+    row = None
+    for r in section.find_all("tr"):
+        label_cell = r.find("td") or r.find("th")
+        if label_cell is None:
+            continue
+        if label_cell.get_text(" ", strip=True).lower().startswith(row_label.lower()):
+            row = r
+            break
+    if row is None:
+        return None
+    for cell in reversed(row.find_all("td")[1:]):
+        text = cell.get_text(strip=True).replace(",", "").replace("%", "")
+        try:
+            return float(text)
+        except ValueError:
+            continue
+    return None
+
+
+def _calc_debt_to_equity(soup: BeautifulSoup) -> float | None:
+    """Not a direct ratio on screener.in's current page layout (checked
+    several companies with real debt, including Tata Steel - "Debt to
+    equity" doesn't appear anywhere on the page) - calculated instead from
+    the balance sheet's most recent year: Borrowings / (Equity Capital +
+    Reserves)."""
+    borrowings = _parse_annual_series(soup, "balance-sheet", "Borrowings")
+    equity_capital = _parse_annual_series(soup, "balance-sheet", "Equity Capital")
+    reserves = _parse_annual_series(soup, "balance-sheet", "Reserves")
+    if not borrowings or not equity_capital or not reserves:
+        return None
+    equity = equity_capital[-1] + reserves[-1]
+    if equity <= 0:
+        return None  # negative/zero equity - D/E isn't meaningful, not "infinite debt"
+    return round(borrowings[-1] / equity, 2)
 
 
 def fetch_fundamentals(symbol: str, screener_symbol: str | None = None) -> StockFundamentals:
@@ -134,11 +182,17 @@ def fetch_fundamentals(symbol: str, screener_symbol: str | None = None) -> Stock
         soup = BeautifulSoup(resp.text, "lxml")
 
         sf.roce = _parse_ratio(soup, "ROCE")
-        sf.debt_to_equity = _parse_ratio(soup, "Debt to equity")
-        sf.promoter_holding = _parse_ratio(soup, "Promoter holding")
-        sf.promoter_pledge = _parse_ratio(soup, "Pledged percentage")
-        sf.fii_holding = _parse_ratio(soup, "FII holding")
-        sf.dii_holding = _parse_ratio(soup, "DII holding")
+        sf.debt_to_equity = _calc_debt_to_equity(soup)
+        sf.promoter_holding = _parse_shareholding_latest(soup, "Promoters")
+        sf.fii_holding = _parse_shareholding_latest(soup, "FIIs")
+        sf.dii_holding = _parse_shareholding_latest(soup, "DIIs")
+        # Promoter pledge: checked 2026-11-17 against 5 companies including
+        # known pledge-heavy names - not exposed as a ratio or in the
+        # expanded shareholder-detail endpoint on screener.in's current
+        # page layout. Left None (never guessed) rather than silently
+        # dropped from the formula - see score_fundamentals_breakdown and
+        # the Methodology page for how this is surfaced as a known gap.
+        sf.promoter_pledge = None
         sf.pe_ratio = _parse_ratio(soup, "Stock P/E")
 
         sector_link = soup.select_one('a[title="Broad Sector"]')

@@ -178,11 +178,10 @@ def prior_down_or_flat(slope_up: bool | None) -> bool:
     return slope_up is False or slope_up is None
 
 
-def score_universe(tickers: list[str]) -> pd.DataFrame:
-    """Download price history for every ticker + the Nifty 50 benchmark,
-    compute per-stock momentum features, then rank them into a 0-100
-    Momentum score. Returns one row per ticker."""
-    print(f"[price_momentum] downloading {len(tickers)} tickers...")
+def _fetch_raw_momentum(tickers: list[str], nifty_hist: pd.DataFrame) -> pd.DataFrame:
+    """One bulk yfinance call for this exact ticker list -> one
+    StockMomentum row each (no ranking yet - that needs the full universe
+    assembled first, see score_universe)."""
     data = yf.download(
         tickers,
         period=f"{LOOKBACK_DAYS}d",
@@ -191,10 +190,6 @@ def score_universe(tickers: list[str]) -> pd.DataFrame:
         threads=True,
         progress=False,
     )
-    nifty_hist = yf.download(
-        NIFTY50_TICKER, period=f"{LOOKBACK_DAYS}d", auto_adjust=True, progress=False
-    )
-
     rows = []
     for ticker in tickers:
         try:
@@ -203,8 +198,46 @@ def score_universe(tickers: list[str]) -> pd.DataFrame:
             rows.append(StockMomentum(ticker=ticker, error="no data returned"))
             continue
         rows.append(compute_stock_momentum(ticker, hist, nifty_hist))
+    return pd.DataFrame([vars(r) for r in rows])
 
-    df = pd.DataFrame([vars(r) for r in rows])
+
+def score_universe(tickers: list[str]) -> pd.DataFrame:
+    """Download price history for every ticker + the Nifty 50 benchmark,
+    compute per-stock momentum features, then rank them into a 0-100
+    Momentum score. Returns one row per ticker.
+
+    yfinance's bulk multi-ticker download is unreliable at this scale: a
+    fraction of tickers in a ~300-ticker single call randomly come back
+    with no/incomplete data even though the same ticker fetches cleanly
+    alone (confirmed 2026-11-17 - TCS, Marico, PowerGrid and 20 others all
+    showed "insufficient price history" from one run despite having years
+    of real trading history). So any ticker that errors in the main batch
+    gets one retry as a much smaller batch, which empirically succeeds -
+    not a sign the ticker itself has a problem."""
+    print(f"[price_momentum] downloading {len(tickers)} tickers...")
+    nifty_hist = yf.download(
+        NIFTY50_TICKER, period=f"{LOOKBACK_DAYS}d", auto_adjust=True, progress=False
+    )
+    df = _fetch_raw_momentum(tickers, nifty_hist)
+
+    failed_tickers = df.loc[df["error"].notna(), "ticker"].tolist()
+    if failed_tickers:
+        print(
+            f"[price_momentum] {len(failed_tickers)} tickers errored in the main batch - "
+            f"retrying as a smaller batch..."
+        )
+        retry_df = _fetch_raw_momentum(failed_tickers, nifty_hist)
+        resolved = retry_df[retry_df["error"].isna()]
+        if len(resolved):
+            # Direct .loc assignment, not df.update(): update() skips NaN
+            # values in the other frame, which would leave the original
+            # "insufficient price history" error in place even though the
+            # retry succeeded (its error column is NaN, not a real value).
+            df = df.set_index("ticker")
+            resolved_indexed = resolved.set_index("ticker")
+            df.loc[resolved_indexed.index, resolved_indexed.columns] = resolved_indexed
+            df = df.reset_index()
+            print(f"[price_momentum]   ...{len(resolved)}/{len(failed_tickers)} resolved on retry")
 
     # Weighted blend of ranked sub-metrics -> momentum_score (0-100).
     # The per-input percentile ranks are persisted (rank_<col>) rather than

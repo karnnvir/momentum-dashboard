@@ -33,6 +33,17 @@ SITEMAP_CACHE = ROOT / "data" / "universe_cache" / "trendlyne_sitemap.xml"
 CONSENSUS_URL = "https://trendlyne.com/equity/consensus-estimates/{id}/{symbol}/{slug}/"
 REQUEST_DELAY_SECONDS = 1.5  # be polite - same etiquette as fundamentals.py's screener.in scraping
 
+# Trendlyne intermittently serves a page with no RECOMMENDATION block for a
+# stock that demonstrably has one (confirmed 2026-11-17: Kalyan Jewellers,
+# Fortis, Glaxo all came back empty during a full-universe batch run, then
+# returned real data seconds later on a standalone retry - repeated,
+# genuinely-uncovered stocks like Bajaj Holdings stayed empty across 3
+# back-to-back attempts). Looks like soft rate-limiting under sustained
+# sequential load, not a real "no coverage" signal - so a single empty
+# result is retried before being accepted as genuine, rather than cached
+# as confirmed-no-coverage off one unlucky response.
+NO_DATA_RETRY_ATTEMPTS = 3
+
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -134,14 +145,27 @@ def fetch_analyst_consensus_for_universe(symbols: list[str]) -> tuple[dict[str, 
         mapping = symbol_map.get(symbol)
         if mapping is not None:
             tl_id, slug = mapping
-            try:
-                data = fetch_analyst_consensus(symbol, tl_id, slug)
-            except Exception as exc:  # noqa: BLE001
-                print(f"[analyst_consensus] {symbol} failed: {exc}")
-                failed.add(symbol)
-            else:
+            data = None
+            last_exc: Exception | None = None
+            for attempt in range(NO_DATA_RETRY_ATTEMPTS):
+                try:
+                    data = fetch_analyst_consensus(symbol, tl_id, slug)
+                    last_exc = None
+                except Exception as exc:  # noqa: BLE001
+                    last_exc = exc
+                    data = None
                 if data is not None:
-                    results[symbol] = data
+                    break
+                if attempt < NO_DATA_RETRY_ATTEMPTS - 1:
+                    time.sleep(REQUEST_DELAY_SECONDS)
+            if data is not None:
+                results[symbol] = data
+            elif last_exc is not None:
+                print(f"[analyst_consensus] {symbol} failed after {NO_DATA_RETRY_ATTEMPTS} attempts: {last_exc}")
+                failed.add(symbol)
+            # else: no RECOMMENDATION block on every one of
+            # NO_DATA_RETRY_ATTEMPTS clean responses - accepted as genuine
+            # no-coverage, not a transient blip.
         if i < len(symbols) - 1:
             time.sleep(REQUEST_DELAY_SECONDS)
     return results, failed

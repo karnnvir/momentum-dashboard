@@ -90,13 +90,26 @@ st.write(
 st.header("3. Support Score (0-100)")
 st.write(
     "Currently an **unweighted average** of whichever fundamental signals are available "
-    "(profit growth & acceleration, turnaround, margin change, ROCE, D/E, promoter pledge). "
+    "(profit growth & acceleration, turnaround, margin change, ROCE, D/E). "
     "Flagged as a near-term refinement - see the Phasing doc's Later list."
 )
 st.markdown(
     f"**Earnings-quality discount:** if CFO / Net Profit stays below "
     f"**{CASH_CONVERSION_THRESHOLD}** for 2 consecutive years, the Support Score is "
     f"multiplied by **{CASH_CONVERSION_DISCOUNT_MULTIPLIER}**."
+)
+st.markdown(
+    "**Debt to equity** isn't a direct ratio on screener.in's current page layout (checked "
+    "2026-11-17 against several companies with real debt - it simply doesn't appear anywhere "
+    "on the page) - calculated instead from the balance sheet's latest year: "
+    "`Borrowings / (Equity Capital + Reserves)`."
+)
+st.markdown(
+    "**Promoter pledge is not currently included** - a known gap, not a silent drop. Checked "
+    "2026-11-17: it isn't exposed as a ratio, nor in the expanded shareholder-detail data, on "
+    "screener.in's current page layout for any of the companies tested, including known "
+    "pledge-heavy names. Left out of the formula entirely rather than guessed at; the Risk "
+    "Score's fundamental-deterioration trigger below is affected the same way."
 )
 
 st.header("4. Catalyst Score (0-100)")
@@ -145,7 +158,7 @@ st.markdown(
 - **Time decay**: active if the stock is in a momentum-flagged group with Catalyst Score = 0 (no live catalyst)
 - **Technical exhaustion**: Extension % > {EXTENSION_EXHAUSTION_THRESHOLD:.0%}, or 1-month return > {CLIMAX_RETURN_THRESHOLD:.0%}
 - **Valuation extremes**: *not implemented in v1* - no PEG/valuation data source wired up yet; always inactive rather than fabricated
-- **Fundamental deterioration**: promoter pledge > {PLEDGE_DANGER_PCT:.0f}%, or D/E > {DEBT_TO_EQUITY_DANGER}, or the earnings-quality discount above fired
+- **Fundamental deterioration**: promoter pledge > {PLEDGE_DANGER_PCT:.0f}% (currently always inactive - pledge isn't scraped yet, see Support Score above), or D/E > {DEBT_TO_EQUITY_DANGER}, or the earnings-quality discount above fired
 - **News trigger**: any catalyst recorded with `direction: negative` in its recency window
 
 Risk Score = sum of active trigger points (capped at 100). Risk Band: 0-24 Clear, 25-59 Watch, 60-100 Reduce-Exit -
